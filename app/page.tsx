@@ -1,203 +1,182 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { useState } from "react";
 
-type PersonaId = "kind" | "tough" | "brutal";
-
-const PERSONAS: { id: PersonaId; label: string }[] = [
-  { id: "kind", label: "Kind Coach 🤝" },
-  { id: "tough", label: "Tough Hiring Manager 💼" },
-  { id: "brutal", label: "Brutally Honest Friend 🔥" },
-];
-
-export default function HomePage() {
+export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedPersona, setSelectedPersona] = useState<PersonaId>("kind");
+  const [selectedPersona, setSelectedPersona] = useState("kind");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const [results, setResults] = useState(null);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const personas = [
+    { id: "kind", label: "Kind Coach", emoji: "🤝" },
+    { id: "tough", label: "Tough Hiring Manager", emoji: "💼" },
+    { id: "brutal", label: "Brutally Honest Friend", emoji: "🔥" },
+  ];
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      // Ignore non-PDF files for now; you could show a toast or error later.
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setSelectedFile(file);
+    } else {
+      alert("Please upload a PDF file");
     }
   };
 
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragging(false);
-
-    const file = event.dataTransfer.files?.[0];
-    if (!file) return;
-
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      return;
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === "application/pdf") {
+      setSelectedFile(file);
+    } else {
+      alert("Please upload a PDF file");
     }
-
-    setSelectedFile(file);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     if (!selectedFile) return;
-
     setIsLoading(true);
-    setResults(null);
-    // TODO: Plug in AI resume roast call here and reset isLoading when done.
+    // API call will be added on Day 4
+    alert("Submit working! API will be connected on Day 4.");
+    setIsLoading(false);
   };
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-3xl">
-        <header className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
-            <span className="mr-2">🔥</span>
-            <span className="bg-gradient-to-r from-[#ff6b35] via-orange-400 to-yellow-300 bg-clip-text text-transparent">
-              ResumeRoast
-            </span>
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-neutral-300 max-w-xl mx-auto">
-            Get brutally honest AI feedback on your resume — no sugarcoating, just the real talk you
-            need to level up.
-          </p>
-        </header>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#0f0f0f",
+        color: "#ffffff",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "40px 20px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <h1 style={{ fontSize: "48px", marginBottom: "8px" }}>
+        <span role="img" aria-label="fire">🔥</span> ResumeRoast
+      </h1>
+      <p style={{ color: "#999", fontSize: "18px", marginBottom: "40px" }}>
+        Get brutally honest AI feedback on your resume
+      </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-8 bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.7)] backdrop-blur"
-        >
-          {/* Upload section */}
-          <section>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-400 mb-3">
-              Upload your resume
-            </h2>
-
-            <div
-              className={`relative flex flex-col items-center justify-center gap-3 px-4 py-8 sm:px-8 sm:py-10 border-2 border-dashed rounded-xl cursor-pointer transition
-                ${
-                  isDragging
-                    ? "border-[#ff6b35] bg-[#ff6b35]/5"
-                    : "border-white/15 bg-black/20 hover:border-[#ff6b35]/80 hover:bg-white/5"
-                }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf,.pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-
-              <div className="flex flex-col items-center gap-2 text-center">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#ff6b35]/10 text-[#ff6b35] text-xl">
-                  📄
-                </span>
-                <p className="font-medium">
-                  Drop your <span className="text-[#ff6b35]">PDF</span> resume here
-                </p>
-                <p className="text-xs text-neutral-400">Only PDF files are supported right now.</p>
-              </div>
-
-              {selectedFile && (
-                <div className="mt-4 w-full max-w-md mx-auto flex items-center justify-between gap-3 rounded-lg bg-black/60 border border-white/10 px-3 py-2 text-sm">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <span className="text-[#ff6b35]">✔</span>
-                    <span className="truncate" title={selectedFile.name}>
-                      {selectedFile.name}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveFile}
-                    className="shrink-0 rounded-full px-2 py-1 text-xs uppercase tracking-wide border border-white/20 hover:border-red-400 hover:text-red-400 transition"
-                  >
-                    X
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Persona section */}
-          <section>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-400 mb-3">
-              Choose your roast master
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {PERSONAS.map((persona) => {
-                const isActive = selectedPersona === persona.id;
-                return (
-                  <button
-                    key={persona.id}
-                    type="button"
-                    onClick={() => setSelectedPersona(persona.id)}
-                    className={`w-full rounded-xl px-4 py-3 text-sm font-medium text-left transition border
-                      ${
-                        isActive
-                          ? "bg-[#ff6b35] text-black border-[#ff6b35] shadow-[0_0_30px_rgba(255,107,53,0.6)]"
-                          : "bg-white/5 text-white/90 border-white/10 hover:bg-white/10 hover:border-white/25"
-                      }`}
-                  >
-                    {persona.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Submit button */}
-          <section className="pt-2">
+      {/* Upload Area */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+        style={{
+          border: "2px dashed #ff6b35",
+          borderRadius: "12px",
+          padding: "40px",
+          textAlign: "center",
+          width: "100%",
+          maxWidth: "500px",
+          marginBottom: "30px",
+          cursor: "pointer",
+        }}
+        onClick={() => document.getElementById("fileInput")?.click()}
+      >
+        {selectedFile ? (
+          <div>
+            <p style={{ fontSize: "18px" }}>📄 {selectedFile.name}</p>
             <button
-              type="submit"
-              disabled={!selectedFile || isLoading}
-              className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base sm:text-lg font-semibold
-                transition transform hover:-translate-y-0.5 active:translate-y-0
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
-                ${
-                  !selectedFile || isLoading
-                    ? "bg-[#ff6b35]/40 text-white/70"
-                    : "bg-[#ff6b35] text-black shadow-[0_0_40px_rgba(255,107,53,0.7)] hover:shadow-[0_0_55px_rgba(255,107,53,0.9)]"
-                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedFile(null);
+              }}
+              style={{
+                marginTop: "10px",
+                background: "#333",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
             >
-              {isLoading ? "Roasting..." : "Roast My Resume 🔥"}
+              Remove
             </button>
-          </section>
-        </form>
+          </div>
+        ) : (
+          <div>
+            <p style={{ fontSize: "40px", marginBottom: "10px" }}>📁</p>
+            <p style={{ fontSize: "16px" }}>
+              Drag and drop your resume PDF here
+            </p>
+            <p style={{ color: "#666", fontSize: "14px" }}>or click to browse</p>
+          </div>
+        )}
+        <input
+          id="fileInput"
+          type="file"
+          accept=".pdf"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
       </div>
-    </main>
+
+      {/* Persona Buttons */}
+      <p style={{ marginBottom: "12px", fontSize: "16px" }}>
+        Pick your reviewer:
+      </p>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          marginBottom: "30px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        {personas.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setSelectedPersona(p.id)}
+            style={{
+              padding: "12px 20px",
+              borderRadius: "8px",
+              border: selectedPersona === p.id ? "2px solid #ff6b35" : "2px solid #333",
+              backgroundColor: selectedPersona === p.id ? "#ff6b35" : "#1a1a1a",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "15px",
+            }}
+          >
+            {p.emoji} {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Submit Button */}
+      <button
+        onClick={handleSubmit}
+        disabled={!selectedFile || isLoading}
+        style={{
+          padding: "16px 40px",
+          fontSize: "18px",
+          fontWeight: "bold",
+          borderRadius: "10px",
+          border: "none",
+          backgroundColor: selectedFile ? "#ff6b35" : "#333",
+          color: selectedFile ? "white" : "#666",
+          cursor: selectedFile ? "pointer" : "not-allowed",
+        }}
+      >
+        {isLoading ? "Roasting... 🔥" : "Roast My Resume 🔥"}
+      </button>
+
+      {/* Footer */}
+      <p
+        style={{
+          marginTop: "60px",
+          color: "#444",
+          fontSize: "13px",
+          textAlign: "center",
+        }}
+      >
+        Built with 🔥 and Claude AI — Your resume is never stored
+      </p>
+    </div>
   );
 }
-
