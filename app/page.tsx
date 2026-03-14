@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReviewResults from "./components/ReviewResults";
 
 export default function Home() {
@@ -8,6 +8,43 @@ export default function Home() {
   const [selectedPersona, setSelectedPersona] = useState("kind");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any | null>(null);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const loadingMessages = [
+    "Scanning for buzzword crimes...",
+    "Judging your font choices...",
+    "Counting your bullet points...",
+    "Looking for the 'proficient in Microsoft Office' red flag...",
+    "Checking if you really are a 'team player'...",
+    "Evaluating your humble brags...",
+  ];
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingProgress(0);
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    const messageInterval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 2000);
+
+    const progressInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) return 100;
+        return prev + 3;
+      });
+    }, 200);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(progressInterval);
+    };
+  }, [isLoading]);
 
   const personas = [
     { id: "kind", label: "Kind Coach", emoji: "🤝" },
@@ -17,25 +54,54 @@ export default function Home() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === "application/pdf") {
-      setSelectedFile(file);
-    } else {
-      alert("Please upload a PDF file");
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf";
+    const isTooLarge = file.size > 10 * 1024 * 1024; // 10MB
+
+    if (!isPdf) {
+      setFileError("Please upload a PDF file");
+      setSelectedFile(null);
+      return;
     }
+
+    if (isTooLarge) {
+      setFileError("File too large. Please upload a resume under 10MB");
+      setSelectedFile(null);
+      return;
+    }
+
+    setFileError(null);
+    setSelectedFile(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type === "application/pdf") {
-      setSelectedFile(file);
-    } else {
-      alert("Please upload a PDF file");
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf";
+    const isTooLarge = file.size > 10 * 1024 * 1024; // 10MB
+
+    if (!isPdf) {
+      setFileError("Please upload a PDF file");
+      setSelectedFile(null);
+      return;
     }
+
+    if (isTooLarge) {
+      setFileError("File too large. Please upload a resume under 10MB");
+      setSelectedFile(null);
+      return;
+    }
+
+    setFileError(null);
+    setSelectedFile(file);
   };
 
   const handleSubmit = async () => {
     if (!selectedFile) return;
+    setApiError(null);
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -44,13 +110,13 @@ export default function Home() {
       const res = await fetch("/api/review", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Something went wrong");
+        setApiError(data.error || "Something went wrong. Please try again.");
       } else {
         setResults(data);
         console.log("Results:", data);
       }
     } catch (err) {
-      alert("Failed to connect. Please try again.");
+      setApiError("Failed to connect. Please check your connection and try again.");
     }
     setIsLoading(false);
   };
@@ -137,6 +203,12 @@ export default function Home() {
             />
           </div>
 
+          {fileError && (
+            <div className="mt-3 max-w-[500px] mx-auto border border-red-500/70 bg-[#2a0b0b] text-red-300 text-sm rounded-md px-3 py-2">
+              {fileError}
+            </div>
+          )}
+
           <p style={{ marginBottom: "12px", fontSize: "16px" }}>
             Pick your reviewer:
           </p>
@@ -187,13 +259,49 @@ export default function Home() {
                 selectedFile && !isLoading ? "pointer" : "not-allowed",
             }}
           >
-            {isLoading ? "Roasting... 🔥" : "Roast My Resume 🔥"}
+            {isLoading ? "Roasting your resume..." : "Roast My Resume 🔥"}
           </button>
 
+          {apiError && (
+            <div className="mt-6 max-w-[500px] mx-auto border border-red-500/80 bg-[#2a0b0b] text-red-200 rounded-lg px-4 py-3 space-y-3">
+              <p style={{ fontSize: "14px", fontWeight: 500 }}>
+                {apiError}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setApiError(null);
+                  setResults(null);
+                }}
+                className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md border border-red-400 text-red-200 text-sm font-medium hover:bg-red-500/10 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
           {isLoading && (
-            <p style={{ marginTop: "20px", color: "#ff6b35" }}>
-              Claude is reading your resume...
-            </p>
+            <div className="mt-8 w-full max-w-md mx-auto text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="text-5xl animate-bounce drop-shadow-[0_0_25px_rgba(248,113,113,0.7)]">
+                  🔥
+                </div>
+              </div>
+              <div className="min-h-[40px]">
+                <p className="text-[#ff6b35] text-base sm:text-lg font-medium transition-opacity duration-300 ease-out">
+                  {loadingMessages[loadingMessageIndex]}
+                </p>
+              </div>
+              <div className="w-full h-2 rounded-full bg-[#1a1a1a] overflow-hidden border border-[#262626]">
+                <div
+                  className="h-full bg-gradient-to-r from-[#ff6b35] via-[#f97316] to-[#facc15] transition-all duration-300 ease-out"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                The AI is carefully roasting your resume. This might take a few moments.
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -204,9 +312,18 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ marginTop: "60px", color: "#444", fontSize: "13px", textAlign: "center" }}>
-        Built with 🔥 and Claude AI — Your resume is never stored
-      </p>
+      <div
+        style={{
+          marginTop: "60px",
+          color: "#666",
+          fontSize: "12px",
+          textAlign: "center",
+          lineHeight: 1.6,
+        }}
+      >
+        <p>Built with 🔥 and Claude AI</p>
+        <p>Your resume is processed securely and never stored</p>
+      </div>
     </div>
   );
 }

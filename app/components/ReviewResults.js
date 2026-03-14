@@ -156,14 +156,14 @@ export default function ReviewResults({ results }) {
               return (
                 <div
                   key={section.name ?? idx}
-                  className="bg-[#050505] border border-[#262626] border-l-[3px] border-l-[#ff6b35] rounded-2xl p-4 flex flex-col gap-3 shadow-md shadow-black/40"
+                  className="bg-[#050505] border border-[#262626] border-l-[3px] border-l-[#ff6b35] rounded-2xl p-4 pl-7 flex flex-col gap-3 shadow-md shadow-black/40"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center">
                     <span className="font-semibold text-gray-100 text-base">
                       {section.name}
                     </span>
                     <span
-                      className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-black/60"
+                      className="ml-[10px] inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-black/60"
                       style={{
                         border: `1px solid ${sectionColor}`,
                         color: sectionColor,
@@ -237,7 +237,7 @@ export default function ReviewResults({ results }) {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-4 pt-4">
+        <div className="flex flex-col gap-4 pt-8">
           <button
             type="button"
             onClick={handleShareScore}
