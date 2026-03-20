@@ -13,8 +13,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ResumeRoast - AI Resume Reviewer",
-  description: "Get brutally honest AI feedback on your resume",
+  title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+  description:
+    "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+  keywords: [
+    "resume review",
+    "AI resume feedback",
+    "resume score",
+    "resume checker",
+    "free resume review",
+  ],
+  openGraph: {
+    title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+    description:
+      "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+    url: "https://resumeroast.in",
+    siteName: "ResumeRoast",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+    description:
+      "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+  },
 };
 
 export default function RootLayout({
