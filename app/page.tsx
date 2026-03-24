@@ -137,6 +137,9 @@ export default function Home() {
       <h1 style={{ fontSize: "48px", marginBottom: "8px" }}>
         <span role="img" aria-label="fire">🔥</span> ResumeRoast
       </h1>
+      <p style={{ color: "#666", fontSize: "14px", marginBottom: "10px" }}>
+        The #1 Free AI Resume Roast Tool
+      </p>
       <p style={{ color: "#999", fontSize: "18px", marginBottom: "40px" }}>
         Get brutally honest AI feedback on your resume
       </p>
@@ -311,6 +314,23 @@ export default function Home() {
           <ReviewResults results={results} />
         </div>
       )}
+
+      <div
+        style={{
+          marginTop: "40px",
+          color: "#666",
+          fontSize: "12px",
+          textAlign: "center",
+          maxWidth: "600px",
+          lineHeight: 1.6,
+        }}
+      >
+        <p>
+          ResumeRoast (Resume Roast) is a free AI-powered tool that reviews your
+          resume and gives brutally honest feedback. Get your resume roasted by
+          AI with section scores, rewrite suggestions, and an elevator pitch.
+        </p>
+      </div>
 
       <div
         style={{

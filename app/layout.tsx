@@ -16,29 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+  title:
+    "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
   description:
-    "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+    "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
   keywords: [
-    "resume review",
-    "AI resume feedback",
+    "resumeroast",
+    "resume roast",
+    "AI resume review",
+    "resume feedback",
     "resume score",
-    "resume checker",
-    "free resume review",
+    "free resume checker",
+    "resume roast AI",
   ],
   openGraph: {
-    title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+    title:
+      "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
     description:
-      "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+      "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
     url: "https://resumeroast.in",
     siteName: "ResumeRoast",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ResumeRoast - Free AI Resume Reviewer | Get Instant Feedback",
+    title:
+      "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
     description:
-      "Upload your resume and get brutally honest AI feedback with scores, section-by-section analysis, and rewrite suggestions. Free, fast, and private.",
+      "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
   },
 };
 
