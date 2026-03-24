@@ -9,7 +9,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [fileError, setFileError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -20,29 +19,23 @@ export default function Home() {
     "Looking for the 'proficient in Microsoft Office' red flag...",
     "Checking if you really are a 'team player'...",
     "Evaluating your humble brags...",
+    "Searching for action verbs...",
+    "Measuring your margin sizes...",
+    "Analyzing your LinkedIn URL...",
   ];
 
   useEffect(() => {
     if (!isLoading) {
-      setLoadingProgress(0);
       setLoadingMessageIndex(0);
       return;
     }
 
     const messageInterval = setInterval(() => {
       setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-    }, 2000);
-
-    const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        if (prev >= 100) return 100;
-        return prev + 3;
-      });
-    }, 200);
+    }, 2500);
 
     return () => {
       clearInterval(messageInterval);
-      clearInterval(progressInterval);
     };
   }, [isLoading]);
 
@@ -120,6 +113,93 @@ export default function Home() {
     }
     setIsLoading(false);
   };
+
+  if (isLoading) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center text-center px-6"
+        style={{
+          backgroundColor: "#0f0f0f",
+          color: "#ffffff",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <style jsx>{`
+          @keyframes firePulse {
+            0% {
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(1.3);
+            }
+            100% {
+              transform: scale(1);
+            }
+          }
+
+          @keyframes messageFade {
+            0% {
+              opacity: 0.1;
+            }
+            20% {
+              opacity: 1;
+            }
+            80% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0.1;
+            }
+          }
+
+          @keyframes progressFill {
+            0% {
+              width: 5%;
+            }
+            100% {
+              width: 90%;
+            }
+          }
+        `}</style>
+
+        <div
+          className="mb-6"
+          style={{ fontSize: "60px", animation: "firePulse 1s ease-in-out infinite" }}
+        >
+          🔥
+        </div>
+
+        <p
+          key={loadingMessageIndex}
+          className="text-base sm:text-lg font-medium min-h-[32px] mb-5"
+          style={{
+            color: "#ff6b35",
+            animation: "messageFade 2.5s ease-in-out",
+          }}
+        >
+          {loadingMessages[loadingMessageIndex]}
+        </p>
+
+        <div
+          className="w-full rounded-full overflow-hidden"
+          style={{ maxWidth: "300px", height: "6px", backgroundColor: "#333" }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              backgroundColor: "#ff6b35",
+              width: "5%",
+              animation: "progressFill 30s linear forwards",
+            }}
+          />
+        </div>
+
+        <p className="mt-4 text-xs" style={{ color: "#9a9a9a" }}>
+          This usually takes 15-30 seconds.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -280,29 +360,6 @@ export default function Home() {
             </div>
           )}
 
-          {isLoading && (
-            <div className="mt-8 w-full max-w-md mx-auto text-center space-y-4">
-              <div className="flex justify-center">
-                <div className="text-5xl animate-bounce drop-shadow-[0_0_25px_rgba(248,113,113,0.7)]">
-                  🔥
-                </div>
-              </div>
-              <div className="min-h-[40px]">
-                <p className="text-[#ff6b35] text-base sm:text-lg font-medium transition-opacity duration-300 ease-out">
-                  {loadingMessages[loadingMessageIndex]}
-                </p>
-              </div>
-              <div className="w-full h-2 rounded-full bg-[#1a1a1a] overflow-hidden border border-[#262626]">
-                <div
-                  className="h-full bg-gradient-to-r from-[#ff6b35] via-[#f97316] to-[#facc15] transition-all duration-300 ease-out"
-                  style={{ width: `${loadingProgress}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-500">
-                The AI is carefully roasting your resume. This might take a few moments.
-              </p>
-            </div>
-          )}
         </div>
       )}
 
