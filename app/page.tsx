@@ -130,17 +130,17 @@ export default function Home() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "40px 20px",
+        padding: "20px 20px 16px",
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <h1 style={{ fontSize: "48px", marginBottom: "8px" }}>
+      <h1 style={{ fontSize: "36px", marginBottom: "4px" }}>
         <span role="img" aria-label="fire">🔥</span> ResumeRoast
       </h1>
-      <p style={{ color: "#666", fontSize: "14px", marginBottom: "10px" }}>
+      <p style={{ color: "#666", fontSize: "14px", marginBottom: "6px" }}>
         The #1 Free AI Resume Roast Tool
       </p>
-      <p style={{ color: "#999", fontSize: "18px", marginBottom: "40px" }}>
+      <p style={{ color: "#999", fontSize: "16px", marginBottom: "20px" }}>
         Get brutally honest AI feedback on your resume
       </p>
 
@@ -156,11 +156,11 @@ export default function Home() {
             style={{
               border: "2px dashed #ff6b35",
               borderRadius: "12px",
-              padding: "40px",
+              padding: "20px",
               textAlign: "center",
               width: "100%",
-              maxWidth: "500px",
-              marginBottom: "30px",
+              maxWidth: "450px",
+              marginBottom: "15px",
               cursor: "pointer",
             }}
             onClick={() => document.getElementById("fileInput")?.click()}
@@ -188,12 +188,9 @@ export default function Home() {
               </div>
             ) : (
               <div>
-                <p style={{ fontSize: "40px", marginBottom: "10px" }}>📁</p>
-                <p style={{ fontSize: "16px" }}>
-                  Drag and drop your resume PDF here
-                </p>
-                <p style={{ color: "#666", fontSize: "14px" }}>
-                  or click to browse
+                <p style={{ fontSize: "28px", marginBottom: "8px" }}>📁</p>
+                <p style={{ fontSize: "14px", color: "#bbb" }}>
+                  Drag & drop your resume here | or click to browse
                 </p>
               </div>
             )}
@@ -218,8 +215,8 @@ export default function Home() {
           <div
             style={{
               display: "flex",
-              gap: "12px",
-              marginBottom: "30px",
+              gap: "8px",
+              marginBottom: "15px",
               flexWrap: "wrap",
               justifyContent: "center",
             }}
@@ -229,7 +226,7 @@ export default function Home() {
                 key={p.id}
                 onClick={() => setSelectedPersona(p.id)}
                 style={{
-                  padding: "12px 20px",
+                  padding: "8px 16px",
                   borderRadius: "8px",
                   border:
                     selectedPersona === p.id
@@ -239,7 +236,7 @@ export default function Home() {
                     selectedPersona === p.id ? "#ff6b35" : "#1a1a1a",
                   color: "white",
                   cursor: "pointer",
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 {p.emoji} {p.label}
@@ -251,8 +248,8 @@ export default function Home() {
             onClick={handleSubmit}
             disabled={!selectedFile || isLoading}
             style={{
-              padding: "16px 40px",
-              fontSize: "18px",
+              padding: "12px 32px",
+              fontSize: "17px",
               fontWeight: "bold",
               borderRadius: "10px",
               border: "none",
@@ -317,7 +314,7 @@ export default function Home() {
 
       <div
         style={{
-          marginTop: "40px",
+          marginTop: "24px",
           color: "#666",
           fontSize: "12px",
           textAlign: "center",
@@ -334,7 +331,7 @@ export default function Home() {
 
       <div
         style={{
-          marginTop: "60px",
+          marginTop: "24px",
           color: "#666",
           fontSize: "12px",
           textAlign: "center",
