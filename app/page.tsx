@@ -45,15 +45,28 @@ export default function Home() {
     { id: "brutal", label: "Brutally Honest Friend", emoji: "🔥" },
   ];
 
+  const DOCX_MIME =
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+  const isAllowedResumeFile = (file: File) => {
+    if (
+      file.type === "application/pdf" ||
+      file.type === DOCX_MIME
+    ) {
+      return true;
+    }
+    const name = file.name.toLowerCase();
+    return name.endsWith(".pdf") || name.endsWith(".docx");
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isPdf = file.type === "application/pdf";
     const isTooLarge = file.size > 10 * 1024 * 1024; // 10MB
 
-    if (!isPdf) {
-      setFileError("Please upload a PDF file");
+    if (!isAllowedResumeFile(file)) {
+      setFileError("Please upload a PDF or DOCX file");
       setSelectedFile(null);
       return;
     }
@@ -73,11 +86,10 @@ export default function Home() {
     const file = e.dataTransfer.files[0];
     if (!file) return;
 
-    const isPdf = file.type === "application/pdf";
     const isTooLarge = file.size > 10 * 1024 * 1024; // 10MB
 
-    if (!isPdf) {
-      setFileError("Please upload a PDF file");
+    if (!isAllowedResumeFile(file)) {
+      setFileError("Please upload a PDF or DOCX file");
       setSelectedFile(null);
       return;
     }
@@ -270,14 +282,15 @@ export default function Home() {
               <div>
                 <p style={{ fontSize: "28px", marginBottom: "8px" }}>📁</p>
                 <p style={{ fontSize: "14px", color: "#bbb" }}>
-                  Drag & drop your resume here | or click to browse
+                  Drag and drop your resume PDF or DOCX here | or click to
+                  browse
                 </p>
               </div>
             )}
             <input
               id="fileInput"
               type="file"
-              accept=".pdf"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={handleFileChange}
               style={{ display: "none" }}
             />

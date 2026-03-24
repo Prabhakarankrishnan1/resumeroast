@@ -1,10 +1,33 @@
+import { createRequire } from "module";
 import { NextResponse } from "next/server";
+
+const require = createRequire(import.meta.url);
+const mammoth = require("mammoth");
 
 // Basic in-memory rate limit (resets on server restart).
 // Keyed by client IP to mitigate rapid repeated review requests.
 const rateLimitByIp = new Map();
 const MAX_REQUESTS_PER_HOUR = 10;
 const WINDOW_MS = 60 * 60 * 1000;
+
+const DOCX_MIME =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+const REVIEW_JSON_INSTRUCTION = `Review this resume and provide feedback in the following JSON format. Return ONLY valid JSON, no other text:
+{
+  "overallScore": 7,
+  "summary": "assessment here",
+  "sections": [
+    {
+      "name": "Experience",
+      "score": 7,
+      "feedback": "feedback here",
+      "rewrite": "rewritten bullet or null"
+    }
+  ],
+  "topThreeImprovements": ["one", "two", "three"],
+  "elevatorPitch": "pitch here"
+}`;
 
 function getClientIp(request) {
   const xff = request.headers.get("x-forwarded-for");
@@ -20,6 +43,7 @@ function getClientIp(request) {
   return "unknown";
 }
 
+/** @param {import("next/server").NextRequest} request */
 export async function POST(request) {
   try {
     const now = Date.now();
@@ -49,8 +73,51 @@ export async function POST(request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    const fileType = file.type;
+
+    if (fileType !== "application/pdf" && fileType !== DOCX_MIME) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Please upload a PDF or DOCX." },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
+    const buffer = Buffer.from(bytes);
+
+    let userContent;
+
+    if (fileType === "application/pdf") {
+      const base64 = buffer.toString("base64");
+      userContent = [
+        {
+          type: "document",
+          source: {
+            type: "base64",
+            media_type: "application/pdf",
+            data: base64,
+          },
+        },
+        {
+          type: "text",
+          text: REVIEW_JSON_INSTRUCTION,
+        },
+      ];
+    } else {
+      const { value: resumeText } = await mammoth.extractRawText({ buffer });
+      if (!resumeText || !String(resumeText).trim()) {
+        return NextResponse.json(
+          { error: "Could not read text from this DOCX file." },
+          { status: 400 }
+        );
+      }
+      userContent = [
+        {
+          type: "text",
+          text: `Resume content:\n\n${resumeText}\n\n${REVIEW_JSON_INSTRUCTION}`,
+        },
+      ];
+    }
 
     const personaPrompts = {
       kind: "You are a warm, encouraging career coach who gives constructive feedback with empathy.",
@@ -79,20 +146,7 @@ export async function POST(request) {
           messages: [
             {
               role: "user",
-              content: [
-                {
-                  type: "document",
-                  source: {
-                    type: "base64",
-                    media_type: "application/pdf",
-                    data: base64,
-                  },
-                },
-                {
-                  type: "text",
-                  text: "Review this resume and provide feedback in the following JSON format. Return ONLY valid JSON, no other text:\n{\n  \"overallScore\": 7,\n  \"summary\": \"assessment here\",\n  \"sections\": [\n    {\n      \"name\": \"Experience\",\n      \"score\": 7,\n      \"feedback\": \"feedback here\",\n      \"rewrite\": \"rewritten bullet or null\"\n    }\n  ],\n  \"topThreeImprovements\": [\"one\", \"two\", \"three\"],\n  \"elevatorPitch\": \"pitch here\"\n}",
-                },
-              ],
+              content: userContent,
             },
           ],
         }),
