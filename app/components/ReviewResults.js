@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 
 /**
  * @typedef {Object} ReviewSection
@@ -20,10 +22,16 @@ import { useEffect, useState } from "react";
  */
 
 /**
- * @param {{ results: ReviewResultsData }} props
+ * @param {{ results: ReviewResultsData, isFixing?: boolean, onFixResume?: () => void | Promise<void>, fixedResume?: string | null }} props
  */
-export default function ReviewResults({ results }) {
+export default function ReviewResults({
+  results,
+  isFixing = false,
+  onFixResume,
+  fixedResume = null,
+}) {
   const [mounted, setMounted] = useState(false);
+  const [showFullFixedResume, setShowFullFixedResume] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -74,6 +82,151 @@ export default function ReviewResults({ results }) {
     if (typeof window !== "undefined") {
       window.location.reload();
     }
+  };
+
+  const isAllCapsHeadingLine = (line) => {
+    const trimmed = (line ?? "").trim();
+    if (!trimmed) return false;
+    if (trimmed !== trimmed.toUpperCase()) return false;
+    return /^[A-Z][A-Z\s&/.,'’()-]*$/.test(trimmed);
+  };
+
+  const stripMarkdownBoldMarkers = (text) => (text ?? "").replace(/\*\*/g, "");
+
+  const isWrappedInMarkdownBold = (line) => {
+    const trimmed = (line ?? "").trim();
+    return /^\*\*[^*]+?\*\*$/.test(trimmed);
+  };
+
+  /**
+   * Splits a line into TextRuns, making **bold** segments bold.
+   * Also strips all "**" markers from output text.
+   * @param {string} line
+   * @param {{ size?: number, color?: string, boldAll?: boolean }} [opts]
+   */
+  const markdownLineToRuns = (line, opts = {}) => {
+    const { size, color, boldAll = false } = opts;
+    const raw = (line ?? "").toString();
+
+    // Split by **...** while keeping the markers content.
+    const parts = raw.split(/\*\*(.+?)\*\*/g);
+    const runs = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i] ?? "";
+      if (!part) continue;
+
+      const isBoldSegment = i % 2 === 1;
+      runs.push(
+        new TextRun({
+          text: stripMarkdownBoldMarkers(part),
+          bold: boldAll || isBoldSegment,
+          size,
+          color,
+        })
+      );
+    }
+
+    // If the line had no visible content after parsing, return a single empty run.
+    if (runs.length === 0) {
+      runs.push(
+        new TextRun({
+          text: "",
+          bold: boldAll,
+          size,
+          color,
+        })
+      );
+    }
+
+    return runs;
+  };
+
+  const handleDownloadImprovedResume = async () => {
+    if (!fixedResume) return;
+
+    const lines = fixedResume.split(/\r?\n/);
+    const paragraphs = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        paragraphs.push(
+          new Paragraph({
+            spacing: { before: 200 },
+            children: [new TextRun({ text: "" })],
+          })
+        );
+        continue;
+      }
+
+      const isHeading =
+        isAllCapsHeadingLine(line) || isWrappedInMarkdownBold(line);
+
+      if (isHeading) {
+        paragraphs.push(
+          new Paragraph({
+            heading: HeadingLevel.HEADING_1,
+            children: markdownLineToRuns(trimmed, {
+              boldAll: true,
+              size: 28, // 14pt
+              color: "1A365D",
+            }),
+          })
+        );
+        continue;
+      }
+
+      const isBullet = trimmed.startsWith("• ") || trimmed.startsWith("- ");
+      if (isBullet) {
+        const bulletText = trimmed.replace(/^(?:•|-)\s+/, "");
+        paragraphs.push(
+          new Paragraph({
+            bullet: { level: 0 },
+            indent: { left: 720 },
+            children: markdownLineToRuns(bulletText, { size: 22 }), // 11pt
+          })
+        );
+        continue;
+      }
+
+      paragraphs.push(
+        new Paragraph({
+          children: markdownLineToRuns(trimmed, { size: 22 }), // 11pt
+        })
+      );
+    }
+
+    const doc = new Document({
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Calibri",
+            },
+          },
+        },
+      },
+      sections: [
+        {
+          properties: {
+            page: {
+              margin: {
+                top: 1440,
+                bottom: 1440,
+                left: 1440,
+                right: 1440,
+              },
+            },
+          },
+          children: paragraphs,
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "improved-resume.docx");
   };
 
   const circleRadius = 70;
@@ -237,7 +390,84 @@ export default function ReviewResults({ results }) {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-4 pt-8">
+        <div className="flex flex-col gap-5 pt-8">
+          {typeof onFixResume === "function" && (
+            <div className="flex flex-col gap-4">
+              <button
+                type="button"
+                onClick={onFixResume}
+                disabled={isFixing}
+                className={[
+                  "mt-[30px] w-full inline-flex justify-center items-center px-5 h-[50px] rounded-[10px] font-bold text-white transition-colors",
+                  isFixing ? "cursor-not-allowed opacity-70" : "hover:brightness-110",
+                ].join(" ")}
+                style={{ backgroundColor: "#16a34a" }}
+              >
+                {isFixing
+                  ? "Generating improved content..."
+                  : "Get AI-Improved Content ✨"}
+              </button>
+
+              {fixedResume && (
+                <div className="w-full flex flex-col gap-3">
+                  <div
+                    style={{
+                      backgroundColor: "#1a1a1a",
+                      padding: "16px",
+                      borderRadius: "12px",
+                      border: "1px solid #262626",
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <h3 className="text-base font-semibold text-white">
+                        AI-Improved Resume Content ✨
+                      </h3>
+                      {fixedResume.length > 500 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowFullFixedResume((v) => !v)}
+                          className="text-xs px-3 py-1 rounded-full border border-[#3b82f6] text-[#3b82f6] hover:bg-[#3b82f6]/10 active:scale-95 transition-transform"
+                        >
+                          {showFullFixedResume ? "Show Less" : "Show More"}
+                        </button>
+                      )}
+                    </div>
+
+                    <pre
+                      style={{
+                        fontFamily:
+                          'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                        color: "#e5e7eb",
+                        fontSize: "13px",
+                        lineHeight: 1.6,
+                        margin: 0,
+                      }}
+                    >
+                      {showFullFixedResume
+                        ? fixedResume
+                        : fixedResume.slice(0, 500) +
+                          (fixedResume.length > 500 ? "…" : "")}
+                    </pre>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadImprovedResume}
+                    className="w-full inline-flex justify-center items-center px-5 h-[50px] rounded-[12px] font-bold text-white hover:brightness-110 active:scale-[0.99] transition-transform"
+                    style={{ backgroundColor: "#3b82f6" }}
+                  >
+                    Download as DOCX Draft 📄
+                  </button>
+                  <p style={{ color: "#666", fontSize: "12px", margin: 0 }}>
+                    Note: This is a content draft with AI-improved text. Copy the
+                    suggestions into your original resume to keep your formatting.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleShareScore}

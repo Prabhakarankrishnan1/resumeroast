@@ -11,6 +11,8 @@ export default function Home() {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [fileError, setFileError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [isFixing, setIsFixing] = useState(false);
+  const [fixedResume, setFixedResume] = useState<string | null>(null);
 
   const loadingMessages = [
     "Scanning for buzzword crimes...",
@@ -108,6 +110,8 @@ export default function Home() {
     if (!selectedFile) return;
     setApiError(null);
     setIsLoading(true);
+    setIsFixing(false);
+    setFixedResume(null);
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -124,6 +128,30 @@ export default function Home() {
       setApiError("Failed to connect. Please check your connection and try again.");
     }
     setIsLoading(false);
+  };
+
+  const handleFixResume = async () => {
+    setIsFixing(true);
+    try {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const res = await fetch("/api/fix", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.error || "Something went wrong. Please try again.");
+        return;
+      }
+
+      setFixedResume(data?.improvedResume ?? null);
+    } catch (e: any) {
+      alert(e?.message || "Failed to fix resume. Please try again.");
+    } finally {
+      setIsFixing(false);
+    }
   };
 
   if (isLoading) {
@@ -378,7 +406,12 @@ export default function Home() {
 
       {results && (
         <div className="w-full mt-8 transition-all duration-500 opacity-100 translate-y-0">
-          <ReviewResults results={results} />
+          <ReviewResults
+            results={results}
+            isFixing={isFixing}
+            onFixResume={handleFixResume}
+            fixedResume={fixedResume}
+          />
         </div>
       )}
 
