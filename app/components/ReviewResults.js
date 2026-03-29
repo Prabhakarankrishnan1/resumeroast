@@ -32,6 +32,8 @@ export default function ReviewResults({
 }) {
   const [mounted, setMounted] = useState(false);
   const [showFullFixedResume, setShowFullFixedResume] = useState(false);
+  const [subscriberEmail, setSubscriberEmail] = useState("");
+  const [subscribeSuccess, setSubscribeSuccess] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -82,6 +84,16 @@ export default function ReviewResults({
     if (typeof window !== "undefined") {
       window.location.reload();
     }
+  };
+
+  const handleSubscribe = () => {
+    if (typeof window === "undefined") return;
+    window.open(
+      "mailto:resumeroast.in@gmail.com?subject=Subscribe to ResumeRoast&body=Please add me to the mailing list. My email: " +
+        subscriberEmail
+    );
+    setSubscribeSuccess(true);
+    setSubscriberEmail("");
   };
 
   const isAllCapsHeadingLine = (line) => {
@@ -387,6 +399,65 @@ export default function ReviewResults({
               </p>
             </div>
           </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "#1a1a1a",
+            borderLeft: "3px solid #ff6b35",
+            padding: "20px",
+            borderRadius: "12px",
+          }}
+        >
+          <p style={{ color: "#fff", fontSize: "15px", margin: "0 0 10px 0" }}>
+            Get weekly resume tips & new feature updates
+          </p>
+          <div style={{ display: "flex", alignItems: "stretch" }}>
+            <input
+              type="email"
+              placeholder="Your email"
+              value={subscriberEmail}
+              onChange={(e) => {
+                setSubscriberEmail(e.target.value);
+                if (subscribeSuccess) setSubscribeSuccess(false);
+              }}
+              style={{
+                backgroundColor: "#111",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRight: "none",
+                borderTopLeftRadius: "8px",
+                borderBottomLeftRadius: "8px",
+                padding: "10px 16px",
+                flex: 1,
+                outline: "none",
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleSubscribe}
+              style={{
+                backgroundColor: "#ff6b35",
+                color: "#fff",
+                fontWeight: 700,
+                border: "none",
+                borderTopRightRadius: "8px",
+                borderBottomRightRadius: "8px",
+                padding: "10px 20px",
+                cursor: "pointer",
+              }}
+            >
+              Subscribe
+            </button>
+          </div>
+          {subscribeSuccess && (
+            <p style={{ color: "#22c55e", fontSize: "12px", margin: "8px 0 0 0" }}>
+              Thanks! We'll keep you updated 🔥
+            </p>
+          )}
+          <p style={{ color: "#666", fontSize: "11px", margin: "8px 0 0 0" }}>
+            No spam, ever. Unsubscribe anytime.
+          </p>
         </div>
 
         {/* Actions */}

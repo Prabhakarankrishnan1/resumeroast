@@ -442,6 +442,27 @@ export default function Home() {
         }}
       >
         <p>Built with 🔥 and Claude AI</p>
+        <p style={{ fontSize: "13px" }}>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdjmv_PXk5RWj5xlhGbZCyYjwm5JYTNLwYqO0Ol6yFLcCC7FA/viewform?usp=header"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#ff6b35", textDecoration: "none" }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Feedback
+          </a>{" "}
+          •{" "}
+          <a
+            href="mailto:resumeroast.in@gmail.com"
+            style={{ color: "#ff6b35", textDecoration: "none" }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            Contact
+          </a>
+        </p>
         <p>Your resume is processed securely and never stored</p>
       </div>
     </div>
