@@ -16,6 +16,7 @@ const DOCX_MIME =
 const REVIEW_JSON_INSTRUCTION = `Review this resume and provide feedback in the following JSON format. Return ONLY valid JSON, no other text:
 {
   "overallScore": 7,
+  "atsScore": 7,
   "summary": "assessment here",
   "sections": [
     {
@@ -25,6 +26,13 @@ const REVIEW_JSON_INSTRUCTION = `Review this resume and provide feedback in the 
       "rewrite": "rewritten bullet or null"
     }
   ],
+  "atsIssues": [
+    "Tables detected that may not parse correctly",
+    "Missing standard section headers",
+    "Graphics or images may not be readable",
+    "Unusual formatting detected"
+  ],
+  "atsKeywords": ["keyword one", "keyword two", "keyword three"],
   "topThreeImprovements": ["one", "two", "three"],
   "elevatorPitch": "pitch here"
 }`;

@@ -15,6 +15,9 @@ import { saveAs } from "file-saver";
 /**
  * @typedef {Object} ReviewResultsData
  * @property {number} overallScore
+ * @property {number | undefined} [atsScore]
+ * @property {string[] | undefined} [atsIssues]
+ * @property {string[] | undefined} [atsKeywords]
  * @property {string} summary
  * @property {ReviewSection[]} sections
  * @property {[string, string, string]} topThreeImprovements
@@ -40,12 +43,15 @@ export default function ReviewResults({
   }, []);
 
   const overallScore = results?.overallScore ?? 0;
+  const hasAtsScore = Number.isFinite(results?.atsScore);
+  const atsScore = hasAtsScore ? results.atsScore : 0;
+  const atsIssues = Array.isArray(results?.atsIssues) ? results.atsIssues : [];
+  const atsKeywords = Array.isArray(results?.atsKeywords) ? results.atsKeywords : [];
 
   const getScoreColor = (score) => {
     if (score <= 4) return "#ef4444"; // red
     if (score <= 6) return "#eab308"; // yellow
-    if (score <= 8) return "#22c55e"; // green
-    return "#10b981"; // emerald
+    return "#22c55e"; // green
   };
 
   const scoreColor = getScoreColor(overallScore);
@@ -245,6 +251,11 @@ export default function ReviewResults({
   const circumference = 2 * Math.PI * circleRadius;
   const progress = Math.max(0, Math.min(1, overallScore / 10));
   const offset = circumference - progress * circumference;
+  const atsCircleRadius = 43;
+  const atsCircumference = 2 * Math.PI * atsCircleRadius;
+  const atsProgress = Math.max(0, Math.min(1, atsScore / 10));
+  const atsOffset = atsCircumference - atsProgress * atsCircumference;
+  const atsScoreColor = getScoreColor(atsScore);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white px-4 py-6">
@@ -254,9 +265,9 @@ export default function ReviewResults({
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
         ].join(" ")}
       >
-        {/* Overall score + summary */}
+        {/* Overall + ATS scores + summary */}
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-[30px] flex-wrap">
             <div className="relative w-[150px] h-[150px] flex items-center justify-center">
               <svg
                 className="w-full h-full"
@@ -294,6 +305,51 @@ export default function ReviewResults({
                 </span>
               </div>
             </div>
+
+            {hasAtsScore && (
+              <div className="flex flex-col items-center justify-center">
+                <div className="relative w-[100px] h-[100px] flex items-center justify-center">
+                  <svg
+                    className="w-full h-full"
+                    viewBox="0 0 110 110"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="55"
+                      cy="55"
+                      r={atsCircleRadius}
+                      fill="transparent"
+                      stroke="#262626"
+                      strokeWidth="8"
+                    />
+                    <circle
+                      cx="55"
+                      cy="55"
+                      r={atsCircleRadius}
+                      fill="transparent"
+                      stroke={atsScoreColor}
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      strokeDasharray={atsCircumference}
+                      strokeDashoffset={atsOffset}
+                      style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-semibold" style={{ color: atsScoreColor }}>
+                      {atsScore}
+                      <span className="text-sm text-gray-400">/10</span>
+                    </span>
+                  </div>
+                </div>
+                <span className="mt-2 text-sm font-semibold text-gray-300">ATS Score</span>
+                <span
+                  style={{ color: "#888", fontSize: "11px", marginTop: "4px" }}
+                >
+                  How ATS-friendly is your resume?
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="w-full">
@@ -306,6 +362,63 @@ export default function ReviewResults({
               </p>
             </div>
           </div>
+
+          {atsIssues.length > 0 && (
+            <div
+              className="w-full rounded-2xl px-6 py-5"
+              style={{
+                backgroundColor: "#0d0d0d",
+                border: "1px solid #262626",
+                borderLeft: "3px solid #ef4444",
+              }}
+            >
+              <h3
+                className="font-semibold text-[#ef4444] mb-3"
+                style={{ fontSize: "20px" }}
+              >
+                ATS Issues Found
+              </h3>
+              <div className="space-y-3 text-left">
+                {atsIssues.map((issue, index) => (
+                  <p key={`${issue}-${index}`} className="text-sm text-gray-200 leading-relaxed">
+                    ⚠️ {issue}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {atsKeywords.length > 0 && (
+            <div
+              className="w-full rounded-2xl px-6 py-5 text-left"
+              style={{
+                backgroundColor: "#0d0d0d",
+                border: "1px solid #262626",
+                borderLeft: "3px solid #22c55e",
+              }}
+            >
+              <h3 className="text-lg font-semibold text-[#22c55e] mb-3">Add These Keywords</h3>
+              <div>
+                {atsKeywords.map((keyword, index) => (
+                  <span
+                    key={`${keyword}-${index}`}
+                    style={{
+                      display: "inline-block",
+                      background: "#1a3a1a",
+                      color: "#ffffff",
+                      border: "1px solid #22c55e",
+                      borderRadius: "999px",
+                      padding: "6px 12px",
+                      margin: "6px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sections */}
