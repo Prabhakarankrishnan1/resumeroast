@@ -35,6 +35,8 @@ export default function ReviewResults({
 }) {
   const [mounted, setMounted] = useState(false);
   const [showFullFixedResume, setShowFullFixedResume] = useState(false);
+  const [showAtsDetails, setShowAtsDetails] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
   const [subscriberEmail, setSubscriberEmail] = useState("");
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
 
@@ -75,9 +77,13 @@ export default function ReviewResults({
     }
   };
 
-  const handleShareScore = () => {
-    const shareText = `I scored ${overallScore}/10 on ResumeRoast! 🔥 Try it at [URL]`;
-    copyToClipboard(shareText);
+  const handleShareScore = async () => {
+    const shareText = `I scored ${overallScore}/10 on ResumeRoast! 🔥 Get your free resume roast at https://resumeroast.in`;
+    await copyToClipboard(shareText);
+    setShowCopied(true);
+    setTimeout(() => {
+      setShowCopied(false);
+    }, 2000);
   };
 
   const handleCopyElevatorPitch = () => {
@@ -344,9 +350,11 @@ export default function ReviewResults({
                 </div>
                 <span className="mt-2 text-sm font-semibold text-gray-300">ATS Score</span>
                 <span
-                  style={{ color: "#888", fontSize: "11px", marginTop: "4px" }}
+                  style={{ color: "#888", fontSize: "12px", marginTop: "4px", maxWidth: "280px" }}
                 >
-                  How ATS-friendly is your resume?
+                  ATS (Applicant Tracking System) is software that companies use to
+                  filter resumes before a human sees them. A low score means your
+                  resume may get auto-rejected.
                 </span>
               </div>
             )}
@@ -363,62 +371,6 @@ export default function ReviewResults({
             </div>
           </div>
 
-          {atsIssues.length > 0 && (
-            <div
-              className="w-full rounded-2xl px-6 py-5"
-              style={{
-                backgroundColor: "#0d0d0d",
-                border: "1px solid #262626",
-                borderLeft: "3px solid #ef4444",
-              }}
-            >
-              <h3
-                className="font-semibold text-[#ef4444] mb-3"
-                style={{ fontSize: "20px" }}
-              >
-                ATS Issues Found
-              </h3>
-              <div className="space-y-3 text-left">
-                {atsIssues.map((issue, index) => (
-                  <p key={`${issue}-${index}`} className="text-sm text-gray-200 leading-relaxed">
-                    ⚠️ {issue}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {atsKeywords.length > 0 && (
-            <div
-              className="w-full rounded-2xl px-6 py-5 text-left"
-              style={{
-                backgroundColor: "#0d0d0d",
-                border: "1px solid #262626",
-                borderLeft: "3px solid #22c55e",
-              }}
-            >
-              <h3 className="text-lg font-semibold text-[#22c55e] mb-3">Add These Keywords</h3>
-              <div>
-                {atsKeywords.map((keyword, index) => (
-                  <span
-                    key={`${keyword}-${index}`}
-                    style={{
-                      display: "inline-block",
-                      background: "#1a3a1a",
-                      color: "#ffffff",
-                      border: "1px solid #22c55e",
-                      borderRadius: "999px",
-                      padding: "6px 12px",
-                      margin: "6px",
-                      fontSize: "13px",
-                    }}
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Sections */}
@@ -477,6 +429,91 @@ export default function ReviewResults({
             })}
           </div>
         </div>
+
+        {(atsIssues.length > 0 || atsKeywords.length > 0) && (
+          <div
+            className="w-full rounded-xl overflow-hidden"
+            style={{
+              backgroundColor: "#0d0d0d",
+              border: "1px solid #262626",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setShowAtsDetails((prev) => !prev)}
+              className="w-full flex items-center justify-between text-left"
+              style={{
+                backgroundColor: "#1a1a1a",
+                padding: "14px 20px",
+                borderRadius: "8px",
+                borderLeft: "3px solid #ff6b35",
+                cursor: "pointer",
+              }}
+            >
+              <span className="text-sm font-bold" style={{ color: "#ff6b35" }}>
+                ATS Details — Issues & Keywords
+              </span>
+              <span className="text-sm" style={{ color: "#ff6b35" }}>
+                {showAtsDetails ? "▲" : "▼"}
+              </span>
+            </button>
+
+            <div
+              style={{
+                maxHeight: showAtsDetails ? "700px" : "0px",
+                overflow: "hidden",
+                transition: "max-height 300ms ease",
+              }}
+            >
+              <div className="px-4 py-3 text-left flex flex-col gap-4">
+                {atsIssues.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-[#ef4444] mb-2 text-sm">
+                      ATS Issues Found
+                    </h3>
+                    <div className="space-y-2">
+                      {atsIssues.map((issue, index) => (
+                        <p
+                          key={`${issue}-${index}`}
+                          className="text-gray-200 leading-relaxed"
+                          style={{ fontSize: "14px" }}
+                        >
+                          ⚠️ {issue}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {atsKeywords.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-[#22c55e] mb-2">
+                      Suggested ATS Keywords
+                    </h3>
+                    <div className="flex flex-wrap gap-[6px]">
+                      {atsKeywords.map((keyword, index) => (
+                        <span
+                          key={`${keyword}-${index}`}
+                          style={{
+                            display: "inline-block",
+                            background: "#1a3a1a",
+                            color: "#ffffff",
+                            border: "1px solid #22c55e",
+                            borderRadius: "999px",
+                            padding: "4px 10px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Top 3 improvements + Elevator pitch */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -655,9 +692,13 @@ export default function ReviewResults({
           <button
             type="button"
             onClick={handleShareScore}
-            className="w-full inline-flex justify-center items-center gap-2 px-5 h-[50px] rounded-full bg-[#ff6b35] text-black font-semibold text-lg shadow-md shadow-black/40 hover:bg-[#ff814f] active:scale-95 transition-transform"
+            className={[
+              "w-full inline-flex justify-center items-center gap-2 px-5 h-[50px] rounded-full font-semibold text-lg shadow-md shadow-black/40 active:scale-95 transition-transform",
+              showCopied ? "text-white hover:bg-[#22c55e]" : "text-black hover:bg-[#ff814f]",
+            ].join(" ")}
+            style={{ backgroundColor: showCopied ? "#16a34a" : "#ff6b35" }}
           >
-            Share Your Score
+            {showCopied ? "Copied! 📋" : "Share Your Score"}
           </button>
           <button
             type="button"

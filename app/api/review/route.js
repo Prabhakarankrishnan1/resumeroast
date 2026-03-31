@@ -27,15 +27,14 @@ const REVIEW_JSON_INSTRUCTION = `Review this resume and provide feedback in the 
     }
   ],
   "atsIssues": [
-    "Tables detected that may not parse correctly",
-    "Missing standard section headers",
-    "Graphics or images may not be readable",
-    "Unusual formatting detected"
+    "Issue with a specific section and an exact fix, e.g. Remove the two-column layout in the Skills section and use a single-column list instead"
   ],
   "atsKeywords": ["keyword one", "keyword two", "keyword three"],
   "topThreeImprovements": ["one", "two", "three"],
   "elevatorPitch": "pitch here"
-}`;
+}
+
+atsIssues: array of strings, each issue must be specific and actionable. Instead of vague warnings like "Complex formatting may not parse correctly", give specific fixes like "Remove the two-column layout in the Skills section - use a single-column list instead" or "Change the header Contact Info to CONTACT to match standard ATS section names" or "Replace the bullet symbol ● with standard bullet • for better ATS parsing". Every issue must tell the user exactly WHAT to fix and HOW to fix it. Reference specific sections or content from the resume.`;
 
 function getClientIp(request) {
   const xff = request.headers.get("x-forwarded-for");
