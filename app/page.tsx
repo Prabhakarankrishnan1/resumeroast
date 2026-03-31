@@ -13,6 +13,13 @@ export default function Home() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [isFixing, setIsFixing] = useState(false);
   const [fixedResume, setFixedResume] = useState<string | null>(null);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactSubject, setContactSubject] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactError, setContactError] = useState<string | null>(null);
+  const [isSendingContact, setIsSendingContact] = useState(false);
 
   const loadingMessages = [
     "Scanning for buzzword crimes...",
@@ -151,6 +158,48 @@ export default function Home() {
       alert(e?.message || "Failed to fix resume. Please try again.");
     } finally {
       setIsFixing(false);
+    }
+  };
+
+  const handleSendContactMessage = async () => {
+    if (!contactSubject.trim() || !contactMessage.trim()) {
+      setContactError("Something went wrong, please try again");
+      return;
+    }
+
+    setIsSendingContact(true);
+    setContactError(null);
+    setContactSuccess(false);
+
+    try {
+      const res = await fetch("https://formspree.io/f/mojpwynl", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: contactSubject,
+          message: contactMessage,
+          email: contactEmail,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to send contact message");
+      }
+
+      setContactSuccess(true);
+      setContactSubject("");
+      setContactMessage("");
+      setContactEmail("");
+      setTimeout(() => {
+        setShowContactForm(false);
+        setContactSuccess(false);
+      }, 2000);
+    } catch (e) {
+      setContactError("Something went wrong, please try again");
+    } finally {
+      setIsSendingContact(false);
     }
   };
 
@@ -454,17 +503,162 @@ export default function Home() {
             Feedback
           </a>{" "}
           •{" "}
-          <a
-            href="mailto:resumeroast.in@gmail.com"
-            style={{ color: "#ff6b35", textDecoration: "none" }}
+          <button
+            type="button"
+            onClick={() => setShowContactForm(true)}
+            style={{
+              color: "#ff6b35",
+              textDecoration: "none",
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
             onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
             onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
           >
-            Contact
-          </a>
+            Contact Us
+          </button>
+        </p>
+        <p style={{ color: "#666", fontSize: "12px", marginTop: "6px" }}>
+          resumeroast.in@gmail.com
         </p>
         <p>Your resume is processed securely and never stored</p>
       </div>
+
+      {showContactForm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 50,
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "500px",
+              backgroundColor: "#1a1a1a",
+              borderRadius: "12px",
+              padding: "30px",
+              border: "1px solid #333",
+            }}
+          >
+            <h2 style={{ color: "#ff6b35", fontSize: "24px", margin: "0 0 16px 0" }}>
+              Contact Us
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Subject"
+              value={contactSubject}
+              onChange={(e) => setContactSubject(e.target.value)}
+              style={{
+                width: "100%",
+                backgroundColor: "#111",
+                color: "#fff",
+                border: "1px solid #333",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "12px",
+                outline: "none",
+              }}
+            />
+
+            <textarea
+              rows={5}
+              placeholder="Your message or feedback"
+              value={contactMessage}
+              onChange={(e) => setContactMessage(e.target.value)}
+              style={{
+                width: "100%",
+                backgroundColor: "#111",
+                color: "#fff",
+                border: "1px solid #333",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "12px",
+                outline: "none",
+                resize: "vertical",
+              }}
+            />
+
+            <input
+              type="email"
+              placeholder="Your email (optional)"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              style={{
+                width: "100%",
+                backgroundColor: "#111",
+                color: "#fff",
+                border: "1px solid #333",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "14px",
+                outline: "none",
+              }}
+            />
+
+            {contactSuccess && (
+              <p style={{ color: "#22c55e", fontSize: "13px", margin: "0 0 10px 0" }}>
+                Message sent! We&apos;ll get back to you.
+              </p>
+            )}
+
+            {contactError && (
+              <p style={{ color: "#ef4444", fontSize: "13px", margin: "0 0 10px 0" }}>
+                {contactError}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSendContactMessage}
+              disabled={isSendingContact}
+              style={{
+                width: "100%",
+                height: "44px",
+                backgroundColor: "#ff6b35",
+                color: "#fff",
+                border: "none",
+                borderRadius: "10px",
+                cursor: isSendingContact ? "not-allowed" : "pointer",
+                opacity: isSendingContact ? 0.7 : 1,
+                fontWeight: 700,
+              }}
+            >
+              {isSendingContact ? "Sending..." : "Send Message"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowContactForm(false);
+                setContactError(null);
+                setContactSuccess(false);
+              }}
+              style={{
+                marginTop: "12px",
+                background: "none",
+                border: "none",
+                color: "#999",
+                cursor: "pointer",
+                width: "100%",
+                fontSize: "14px",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
