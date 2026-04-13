@@ -203,17 +203,113 @@ export default function Home() {
     }
   };
 
-  if (isLoading) {
-    return (
+  const TopNav = () => (
+    <>
       <div
-        className="min-h-screen flex flex-col items-center justify-center text-center px-6"
         style={{
-          backgroundColor: "#0f0f0f",
-          color: "#ffffff",
-          fontFamily: "Arial, sans-serif",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          backgroundColor: "#0a0a0a",
+          borderBottom: "1px solid #1a1a1a",
+          padding: "12px 24px",
         }}
       >
-        <style jsx>{`
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "900px",
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <a
+            href="/"
+            style={{
+              color: "#fff",
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: "18px",
+            }}
+          >
+            🔥 ResumeRoast
+          </a>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+            <a
+              href="/"
+              className="top-nav-link"
+              style={{
+                color: "#ffffff",
+                textDecoration: "none",
+                paddingBottom: "4px",
+                borderBottom: "2px solid #ff6b35",
+                fontWeight: 600,
+                fontSize: "14px",
+              }}
+            >
+              Resume Review
+            </a>
+
+            <span
+              className="top-nav-link"
+              style={{
+                color: "#8a8a8a",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}
+            >
+              SkillPrint
+              <span
+                style={{
+                  fontSize: "10px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3px",
+                  color: "#b9b9b9",
+                  border: "1px solid #404040",
+                  borderRadius: "999px",
+                  padding: "2px 6px",
+                  lineHeight: 1.2,
+                }}
+              >
+                Coming Soon
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @media (max-width: 640px) {
+          .top-nav-link {
+            font-size: 13px !important;
+          }
+        }
+      `}</style>
+    </>
+  );
+
+  if (isLoading) {
+    return (
+      <>
+        <TopNav />
+        <div
+          className="min-h-screen flex flex-col items-center justify-center text-center px-6"
+          style={{
+            backgroundColor: "#0f0f0f",
+            color: "#ffffff",
+            fontFamily: "Arial, sans-serif",
+            paddingTop: "60px",
+          }}
+        >
+          <style jsx>{`
           @keyframes firePulse {
             0% {
               transform: scale(1);
@@ -251,42 +347,43 @@ export default function Home() {
           }
         `}</style>
 
-        <div
-          className="mb-6"
-          style={{ fontSize: "60px", animation: "firePulse 1s ease-in-out infinite" }}
-        >
-          🔥
-        </div>
-
-        <p
-          key={loadingMessageIndex}
-          className="text-base sm:text-lg font-medium min-h-[32px] mb-5"
-          style={{
-            color: "#ff6b35",
-            animation: "messageFade 2.5s ease-in-out",
-          }}
-        >
-          {loadingMessages[loadingMessageIndex]}
-        </p>
-
-        <div
-          className="w-full rounded-full overflow-hidden"
-          style={{ maxWidth: "300px", height: "6px", backgroundColor: "#333" }}
-        >
           <div
-            className="h-full rounded-full"
-            style={{
-              backgroundColor: "#ff6b35",
-              width: "5%",
-              animation: "progressFill 30s linear forwards",
-            }}
-          />
-        </div>
+            className="mb-6"
+            style={{ fontSize: "60px", animation: "firePulse 1s ease-in-out infinite" }}
+          >
+            🔥
+          </div>
 
-        <p className="mt-4 text-xs" style={{ color: "#9a9a9a" }}>
-          This usually takes 15-30 seconds.
-        </p>
-      </div>
+          <p
+            key={loadingMessageIndex}
+            className="text-base sm:text-lg font-medium min-h-[32px] mb-5"
+            style={{
+              color: "#ff6b35",
+              animation: "messageFade 2.5s ease-in-out",
+            }}
+          >
+            {loadingMessages[loadingMessageIndex]}
+          </p>
+
+          <div
+            className="w-full rounded-full overflow-hidden"
+            style={{ maxWidth: "300px", height: "6px", backgroundColor: "#333" }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                backgroundColor: "#ff6b35",
+                width: "5%",
+                animation: "progressFill 30s linear forwards",
+              }}
+            />
+          </div>
+
+          <p className="mt-4 text-xs" style={{ color: "#9a9a9a" }}>
+            This usually takes 15-30 seconds.
+          </p>
+        </div>
+      </>
     );
   }
 
@@ -299,78 +396,177 @@ export default function Home() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "20px 20px 16px",
+        padding: "80px 20px 16px",
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <h1 style={{ fontSize: "36px", marginBottom: "4px" }}>
-        <span role="img" aria-label="fire">🔥</span> ResumeRoast
-      </h1>
-      <p style={{ color: "#666", fontSize: "14px", marginBottom: "6px" }}>
-        The #1 Free AI Resume Roast Tool
-      </p>
-      <p style={{ color: "#999", fontSize: "16px", marginBottom: "20px" }}>
-        Get brutally honest AI feedback on your resume
-      </p>
+      <TopNav />
 
       {!results && (
         <div
           className={`transition-all duration-500 ${
             results ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"
           }`}
+          style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
+          <p
             style={{
-              border: "2px dashed #ff6b35",
-              borderRadius: "12px",
-              padding: "20px",
+              color: "#94a3b8",
+              fontSize: "16px",
               textAlign: "center",
-              width: "100%",
-              maxWidth: "450px",
-              marginBottom: "15px",
-              cursor: "pointer",
+              marginBottom: "18px",
+              lineHeight: 1.5,
             }}
-            onClick={() => document.getElementById("fileInput")?.click()}
           >
-            {selectedFile ? (
-              <div>
-                <p style={{ fontSize: "18px" }}>📄 {selectedFile.name}</p>
+            Upload your resume. Pick your reviewer. Get brutally honest feedback.
+          </p>
+
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "480px",
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderRadius: "12px",
+              padding: "18px",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            <div
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => document.getElementById("fileInput")?.click()}
+              className="upload-drop-card"
+              style={{
+                border: "1px dashed #334155",
+                borderRadius: "10px",
+                padding: "18px 14px",
+                marginBottom: "14px",
+                cursor: "pointer",
+                backgroundColor: "#0f172a",
+                transition: "border-color 180ms ease, box-shadow 180ms ease",
+              }}
+            >
+              {selectedFile ? (
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: "16px", color: "#e5e7eb", wordBreak: "break-word" }}>
+                    📄 {selectedFile.name}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedFile(null);
+                    }}
+                    style={{
+                      marginTop: "10px",
+                      background: "#1f2937",
+                      color: "#cbd5e1",
+                      border: "1px solid #334155",
+                      padding: "7px 14px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: "20px", marginBottom: "6px" }}>📄</p>
+                  <p style={{ fontSize: "15px", color: "#e5e7eb", marginBottom: "4px" }}>
+                    Drop your resume here
+                  </p>
+                  <p style={{ fontSize: "12px", color: "#94a3b8" }}>
+                    PDF or DOCX, max 10MB
+                  </p>
+                </div>
+              )}
+              <input
+                id="fileInput"
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                marginBottom: "14px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              {personas.map((p) => (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedFile(null);
-                  }}
+                  key={p.id}
+                  onClick={() => setSelectedPersona(p.id)}
                   style={{
-                    marginTop: "10px",
-                    background: "#333",
-                    color: "white",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "6px",
+                    padding: "6px 12px",
+                    borderRadius: "999px",
+                    border:
+                      selectedPersona === p.id
+                        ? "1px solid #ff6b35"
+                        : "1px solid #334155",
+                    backgroundColor:
+                      selectedPersona === p.id ? "rgba(255, 107, 53, 0.16)" : "#0f172a",
+                    color: selectedPersona === p.id ? "#ff8a5c" : "#cbd5e1",
                     cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: 600,
                   }}
                 >
-                  Remove
+                  {p.emoji} {p.label}
                 </button>
-              </div>
-            ) : (
-              <div>
-                <p style={{ fontSize: "28px", marginBottom: "8px" }}>📁</p>
-                <p style={{ fontSize: "14px", color: "#bbb" }}>
-                  Drag and drop your resume PDF or DOCX here | or click to
-                  browse
-                </p>
-              </div>
-            )}
-            <input
-              id="fileInput"
-              type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
+              ))}
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedFile || isLoading}
+              style={{
+                width: "100%",
+                height: "44px",
+                fontSize: "15px",
+                fontWeight: 700,
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: selectedFile && !isLoading ? "#ff6b35" : "#374151",
+                color: selectedFile && !isLoading ? "white" : "#9ca3af",
+                cursor:
+                  selectedFile && !isLoading ? "pointer" : "not-allowed",
+              }}
+            >
+              {isLoading ? "Roasting your resume..." : "Roast My Resume \u{1F525}"}
+            </button>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "480px",
+              marginTop: "12px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "10px",
+              textAlign: "center",
+              color: "#94a3b8",
+              fontSize: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span>
+              <span style={{ color: "#0d9488" }}>✓</span> Free forever
+            </span>
+            <span>
+              <span style={{ color: "#0d9488" }}>✓</span> No login
+            </span>
+            <span>
+              <span style={{ color: "#0d9488" }}>✓</span> Resume never stored
+            </span>
           </div>
 
           {fileError && (
@@ -379,62 +575,26 @@ export default function Home() {
             </div>
           )}
 
-          <p style={{ marginBottom: "12px", fontSize: "16px" }}>
-            Pick your reviewer:
-          </p>
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              marginBottom: "15px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            {personas.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPersona(p.id)}
+          {apiError && (
+            <div
+              style={{
+                marginTop: "24px",
+                width: "100%",
+                maxWidth: "500px",
+                backgroundColor: "#1e1e1e",
+                border: "1px solid #ef4444",
+                borderRadius: "10px",
+                padding: "16px",
+              }}
+            >
+              <p
                 style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border:
-                    selectedPersona === p.id
-                      ? "2px solid #ff6b35"
-                      : "2px solid #333",
-                  backgroundColor:
-                    selectedPersona === p.id ? "#ff6b35" : "#1a1a1a",
-                  color: "white",
-                  cursor: "pointer",
                   fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#fb7185",
+                  marginBottom: "12px",
                 }}
               >
-                {p.emoji} {p.label}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!selectedFile || isLoading}
-            style={{
-              padding: "12px 32px",
-              fontSize: "17px",
-              fontWeight: "bold",
-              borderRadius: "10px",
-              border: "none",
-              backgroundColor: selectedFile && !isLoading ? "#ff6b35" : "#333",
-              color: selectedFile && !isLoading ? "white" : "#666",
-              cursor:
-                selectedFile && !isLoading ? "pointer" : "not-allowed",
-            }}
-          >
-            {isLoading ? "Roasting your resume..." : "Roast My Resume 🔥"}
-          </button>
-
-          {apiError && (
-            <div className="mt-6 max-w-[500px] mx-auto border border-red-500/80 bg-[#2a0b0b] text-red-200 rounded-lg px-4 py-3 space-y-3">
-              <p style={{ fontSize: "14px", fontWeight: 500 }}>
                 {apiError}
               </p>
               <button
@@ -443,12 +603,32 @@ export default function Home() {
                   setApiError(null);
                   setResults(null);
                 }}
-                className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md border border-red-400 text-red-200 text-sm font-medium hover:bg-red-500/10 transition-colors"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#ff6b35",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 24px",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
               >
                 Try Again
               </button>
             </div>
           )}
+
+          <style jsx>{`
+            .upload-drop-card:hover {
+              border-color: #ff6b35 !important;
+              box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.35),
+                0 0 18px rgba(255, 107, 53, 0.2);
+            }
+          `}</style>
 
         </div>
       )}

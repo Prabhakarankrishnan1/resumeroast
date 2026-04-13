@@ -12,6 +12,9 @@ const WINDOW_MS = 60 * 60 * 1000;
 
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const OVERLOAD_RETRY_DELAY_MS = 3000;
+const OVERLOAD_ERROR_MESSAGE =
+  "Our AI is experiencing high demand right now. Please try again in a minute.";
 
 const REVIEW_JSON_INSTRUCTION = `Review this resume and provide feedback in the following JSON format. Return ONLY valid JSON, no other text:
 {
@@ -48,6 +51,10 @@ function getClientIp(request) {
   if (xRealIp) return xRealIp.trim();
 
   return "unknown";
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** @param {import("next/server").NextRequest} request */
@@ -134,39 +141,68 @@ export async function POST(request) {
 
     const systemPrompt = personaPrompts[persona] || personaPrompts.kind;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60_000); // 60s timeout
+    async function callClaudeWithTimeout() {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60_000); // 60s timeout
 
-    let response;
-    try {
-      response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4096,
-          system: systemPrompt,
-          messages: [
-            {
-              role: "user",
-              content: userContent,
-            },
-          ],
-        }),
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
+      try {
+        return await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 4096,
+            system: systemPrompt,
+            messages: [
+              {
+                role: "user",
+                content: userContent,
+              },
+            ],
+          }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
 
-    if (!response.ok) {
+    async function parseErrorDetails(response) {
       const errorText = await response.text();
-      console.error("Claude API error:", errorText);
-      return NextResponse.json({ error: "AI service error" }, { status: 500 });
+      return {
+        errorText,
+        isOverloaded:
+          response.status === 529 ||
+          errorText.toLowerCase().includes("overloaded_error"),
+      };
+    }
+
+    let response = await callClaudeWithTimeout();
+    if (!response.ok) {
+      let { errorText, isOverloaded } = await parseErrorDetails(response);
+      if (isOverloaded) {
+        await sleep(OVERLOAD_RETRY_DELAY_MS);
+        response = await callClaudeWithTimeout();
+        if (!response.ok) {
+          ({ errorText, isOverloaded } = await parseErrorDetails(response));
+          if (isOverloaded) {
+            console.error("Claude API overloaded after retry:", errorText);
+            return NextResponse.json(
+              { error: OVERLOAD_ERROR_MESSAGE },
+              { status: 503 }
+            );
+          }
+        }
+      }
+
+      if (!response.ok) {
+        console.error("Claude API error:", errorText);
+        return NextResponse.json({ error: "AI service error" }, { status: 500 });
+      }
     }
 
     const data = await response.json();
