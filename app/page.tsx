@@ -637,6 +637,7 @@ export default function Home() {
         <div className="w-full mt-8 transition-all duration-500 opacity-100 translate-y-0">
           <ReviewResults
             results={results}
+            personaId={selectedPersona}
             isFixing={isFixing}
             onFixResume={handleFixResume}
             fixedResume={fixedResume}

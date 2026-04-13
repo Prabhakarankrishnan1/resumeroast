@@ -25,10 +25,11 @@ import { saveAs } from "file-saver";
  */
 
 /**
- * @param {{ results: ReviewResultsData, isFixing?: boolean, onFixResume?: () => void | Promise<void>, fixedResume?: string | null }} props
+ * @param {{ results: ReviewResultsData, personaId?: string, isFixing?: boolean, onFixResume?: () => void | Promise<void>, fixedResume?: string | null }} props
  */
 export default function ReviewResults({
   results,
+  personaId = "kind",
   isFixing = false,
   onFixResume,
   fixedResume = null,
@@ -37,6 +38,7 @@ export default function ReviewResults({
   const [showFullFixedResume, setShowFullFixedResume] = useState(false);
   const [showAtsDetails, setShowAtsDetails] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
+  const [openRewriteBySection, setOpenRewriteBySection] = useState({});
   const [subscriberEmail, setSubscriberEmail] = useState("");
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
 
@@ -262,6 +264,12 @@ export default function ReviewResults({
   const atsProgress = Math.max(0, Math.min(1, atsScore / 10));
   const atsOffset = atsCircumference - atsProgress * atsCircumference;
   const atsScoreColor = getScoreColor(atsScore);
+  const personaById = {
+    kind: "Kind Coach 🤝",
+    tough: "Tough Hiring Manager 💼",
+    brutal: "Brutally Honest Friend 🔥",
+  };
+  const personaLabel = personaById[personaId] || personaById.kind;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white px-4 py-6">
@@ -272,9 +280,35 @@ export default function ReviewResults({
         ].join(" ")}
       >
         {/* Overall + ATS scores + summary */}
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="flex items-center justify-center gap-[30px] flex-wrap">
-            <div className="relative w-[150px] h-[150px] flex items-center justify-center">
+        <div
+          style={{
+            width: "100%",
+            backgroundColor: "#111827",
+            border: "1px solid #1e293b",
+            borderRadius: "12px",
+            padding: "24px",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "14px",
+              right: "16px",
+              fontSize: "12px",
+              color: "#94a3b8",
+              backgroundColor: "rgba(15, 23, 42, 0.9)",
+              border: "1px solid #334155",
+              borderRadius: "999px",
+              padding: "4px 10px",
+            }}
+          >
+            Reviewed as: {personaLabel}
+          </div>
+
+          <div className="flex items-center justify-center gap-[28px] flex-wrap text-center">
+            <div className="flex flex-col items-center">
+              <div className="relative w-[120px] h-[120px] flex items-center justify-center">
               <svg
                 className="w-full h-full"
                 viewBox="0 0 160 160"
@@ -302,19 +336,18 @@ export default function ReviewResults({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                  Overall
-                </span>
                 <span className="text-4xl font-semibold" style={{ color: scoreColor }}>
                   {overallScore}
                   <span className="text-xl text-gray-400">/10</span>
                 </span>
               </div>
+              </div>
+              <span className="mt-2 text-sm font-semibold text-gray-300">Resume Score</span>
             </div>
 
             {hasAtsScore && (
               <div className="flex flex-col items-center justify-center">
-                <div className="relative w-[100px] h-[100px] flex items-center justify-center">
+                <div className="relative w-[80px] h-[80px] flex items-center justify-center">
                   <svg
                     className="w-full h-full"
                     viewBox="0 0 110 110"
@@ -349,28 +382,35 @@ export default function ReviewResults({
                   </div>
                 </div>
                 <span className="mt-2 text-sm font-semibold text-gray-300">ATS Score</span>
-                <span
-                  style={{ color: "#888", fontSize: "12px", marginTop: "4px", maxWidth: "280px" }}
-                >
-                  ATS (Applicant Tracking System) is software that companies use to
-                  filter resumes before a human sees them. A low score means your
-                  resume may get auto-rejected.
-                </span>
               </div>
             )}
           </div>
 
-          <div className="w-full">
-            <div className="bg-[#0d0d0d] border border-[#262626] rounded-2xl px-6 py-5 shadow-lg shadow-black/40">
-              <h2 className="text-lg font-semibold mb-2 text-[#ff6b35]">
-                Summary
-              </h2>
-              <p className="text-gray-200 text-base leading-relaxed">
-                {results?.summary}
-              </p>
-            </div>
-          </div>
+          <div
+            style={{
+              height: "1px",
+              width: "100%",
+              backgroundColor: "#1e293b",
+              marginTop: "18px",
+              marginBottom: "14px",
+            }}
+          />
 
+          <div style={{ textAlign: "left" }}>
+            <h2
+              style={{
+                fontSize: "16px",
+                fontWeight: 600,
+                margin: "0 0 8px 0",
+                color: "#ff6b35",
+              }}
+            >
+              Summary
+            </h2>
+            <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.7, color: "#cbd5e1" }}>
+              {results?.summary}
+            </p>
+          </div>
         </div>
 
         {/* Sections */}
@@ -383,45 +423,91 @@ export default function ReviewResults({
               const rawScore = section.score ?? 0;
               const sectionColor =
                 rawScore <= 4 ? "#ef4444" : rawScore <= 6 ? "#eab308" : "#22c55e";
+              const sectionKey = `${section.name ?? "section"}-${idx}`;
+              const isRewriteOpen = !!openRewriteBySection[sectionKey];
               return (
                 <div
                   key={section.name ?? idx}
-                  className="bg-[#050505] border border-[#262626] border-l-[3px] border-l-[#ff6b35] rounded-2xl p-4 pl-7 flex flex-col gap-3 shadow-md shadow-black/40"
+                  style={{
+                    backgroundColor: "#111827",
+                    borderLeft: `3px solid ${sectionColor}`,
+                    padding: "16px",
+                    marginBottom: "10px",
+                    borderRadius: "8px",
+                  }}
                 >
-                  <div className="flex items-center">
-                    <span className="font-semibold text-gray-100 text-base">
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#ffffff",
+                      }}
+                    >
                       {section.name}
                     </span>
                     <span
-                      className="ml-[10px] inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-black/60"
                       style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        padding: "3px 10px",
+                        borderRadius: "999px",
+                        fontSize: "12px",
+                        fontWeight: 700,
                         border: `1px solid ${sectionColor}`,
                         color: sectionColor,
+                        backgroundColor: "rgba(0, 0, 0, 0.25)",
                       }}
                     >
                       {section.score}/10
                     </span>
                   </div>
-                  <p className="text-sm text-gray-200 leading-relaxed">
+                  <p style={{ color: "#94a3b8", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
                     {section.feedback}
                   </p>
                   {section.rewrite && (
-                    <div className="mt-1 rounded-xl bg-[#1a1a1a] border border-[#ff6b35]/40 p-3 flex flex-col gap-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-[#ff6b35]">
-                          Suggested Rewrite
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(section.rewrite || "")}
-                          className="text-xs px-3 py-1 rounded-full bg-[#ff6b35] text-black font-medium hover:bg-[#ff814f] active:scale-95 transition-transform"
+                    <div style={{ marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenRewriteBySection((prev) => ({
+                            ...prev,
+                            [sectionKey]: !prev[sectionKey],
+                          }))
+                        }
+                        style={{
+                          color: "#ff6b35",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          background: "none",
+                          border: "none",
+                          padding: 0,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {isRewriteOpen ? "Hide suggested rewrite ▲" : "View suggested rewrite ▼"}
+                      </button>
+                      {isRewriteOpen && (
+                        <pre
+                          style={{
+                            marginTop: "10px",
+                            marginBottom: 0,
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                            fontSize: "13px",
+                            lineHeight: 1.6,
+                            color: "#e2e8f0",
+                            backgroundColor: "#0f172a",
+                            border: "1px solid #1e293b",
+                            borderRadius: "8px",
+                            padding: "12px",
+                            fontFamily:
+                              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                          }}
                         >
-                          Copy
-                        </button>
-                      </div>
-                      <pre className="text-sm text-gray-100 whitespace-pre-wrap break-words font-mono">
-                        {section.rewrite}
-                      </pre>
+                          {section.rewrite}
+                        </pre>
+                      )}
                     </div>
                   )}
                 </div>
