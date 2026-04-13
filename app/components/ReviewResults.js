@@ -37,6 +37,7 @@ export default function ReviewResults({
   const [mounted, setMounted] = useState(false);
   const [showFullFixedResume, setShowFullFixedResume] = useState(false);
   const [showAtsDetails, setShowAtsDetails] = useState(false);
+  const [showAllAtsKeywords, setShowAllAtsKeywords] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [openRewriteBySection, setOpenRewriteBySection] = useState({});
   const [subscriberEmail, setSubscriberEmail] = useState("");
@@ -51,6 +52,7 @@ export default function ReviewResults({
   const atsScore = hasAtsScore ? results.atsScore : 0;
   const atsIssues = Array.isArray(results?.atsIssues) ? results.atsIssues : [];
   const atsKeywords = Array.isArray(results?.atsKeywords) ? results.atsKeywords : [];
+  const visibleAtsKeywords = showAllAtsKeywords ? atsKeywords : atsKeywords.slice(0, 10);
 
   const getScoreColor = (score) => {
     if (score <= 4) return "#ef4444"; // red
@@ -551,51 +553,97 @@ export default function ReviewResults({
                 transition: "max-height 300ms ease",
               }}
             >
-              <div className="px-4 py-3 text-left flex flex-col gap-4">
-                {atsIssues.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-[#ef4444] mb-2 text-sm">
-                      ATS Issues Found
-                    </h3>
-                    <div className="space-y-2">
-                      {atsIssues.map((issue, index) => (
-                        <p
-                          key={`${issue}-${index}`}
-                          className="text-gray-200 leading-relaxed"
-                          style={{ fontSize: "14px" }}
-                        >
-                          ⚠️ {issue}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div style={{ padding: "0 16px 12px 16px" }}>
+                <div
+                  style={{
+                    marginTop: "8px",
+                    backgroundColor: "#111827",
+                    border: "1px solid #1e293b",
+                    borderRadius: "8px",
+                    padding: "20px",
+                  }}
+                >
+                  <div className="text-left flex flex-col gap-4">
+                    {atsIssues.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-[#ef4444] mb-2 text-sm">
+                          ATS Issues Found
+                        </h3>
+                        <div className="space-y-2">
+                          {atsIssues.map((issue, index) => (
+                            <p
+                              key={`${issue}-${index}`}
+                              className="text-gray-200 leading-relaxed"
+                              style={{ fontSize: "14px" }}
+                            >
+                              ⚠️ {issue}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {atsKeywords.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-[#22c55e] mb-2">
-                      Suggested ATS Keywords
-                    </h3>
-                    <div className="flex flex-wrap gap-[6px]">
-                      {atsKeywords.map((keyword, index) => (
-                        <span
-                          key={`${keyword}-${index}`}
-                          style={{
-                            display: "inline-block",
-                            background: "#1a3a1a",
-                            color: "#ffffff",
-                            border: "1px solid #22c55e",
-                            borderRadius: "999px",
-                            padding: "4px 10px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
+                    {atsKeywords.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#22c55e] mb-2">
+                          Suggested ATS Keywords
+                        </h3>
+                        <div className="flex flex-wrap gap-[6px]">
+                          {visibleAtsKeywords.map((keyword, index) => (
+                            <span
+                              key={`${keyword}-${index}`}
+                              style={{
+                                display: "inline-block",
+                                background: "#1a3a1a",
+                                color: "#ffffff",
+                                border: "1px solid #22c55e",
+                                borderRadius: "999px",
+                                padding: "4px 10px",
+                                fontSize: "11px",
+                              }}
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                        {atsKeywords.length > 10 && !showAllAtsKeywords && (
+                          <button
+                            type="button"
+                            onClick={() => setShowAllAtsKeywords(true)}
+                            style={{
+                              marginTop: "10px",
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              color: "#ff6b35",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Show all {atsKeywords.length} keywords
+                          </button>
+                        )}
+                        {atsKeywords.length > 10 && showAllAtsKeywords && (
+                          <button
+                            type="button"
+                            onClick={() => setShowAllAtsKeywords(false)}
+                            style={{
+                              marginTop: "10px",
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              color: "#ff6b35",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Show fewer keywords
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -616,7 +664,7 @@ export default function ReviewResults({
             </ol>
           </div>
 
-          <div className="bg-[#050505] border border-[#333] rounded-2xl p-5 shadow-lg shadow-black/40 flex flex-col gap-4">
+          <div className="bg-[#050505] border border-[#333] rounded-2xl p-4 shadow-lg shadow-black/40 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-lg font-semibold text-gray-100">
                 Your Elevator Pitch
@@ -630,7 +678,7 @@ export default function ReviewResults({
               </button>
             </div>
             <div className="relative pl-4 border-l-2 border-[#ff6b35]/70">
-              <p className="text-gray-100 italic leading-relaxed">
+              <p className="text-gray-100 italic leading-relaxed" style={{ fontSize: "14px" }}>
                 “{results?.elevatorPitch}”
               </p>
             </div>
@@ -639,16 +687,16 @@ export default function ReviewResults({
 
         <div
           style={{
-            backgroundColor: "#1a1a1a",
-            borderLeft: "3px solid #ff6b35",
+            backgroundColor: "#111827",
+            border: "1px solid #1e293b",
             padding: "20px",
-            borderRadius: "12px",
+            borderRadius: "10px",
           }}
         >
           <p style={{ color: "#fff", fontSize: "15px", margin: "0 0 10px 0" }}>
             Get weekly resume tips & new feature updates
           </p>
-          <div style={{ display: "flex", alignItems: "stretch" }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             <input
               type="email"
               placeholder="Your email"
@@ -664,7 +712,8 @@ export default function ReviewResults({
                 borderRight: "none",
                 borderTopLeftRadius: "8px",
                 borderBottomLeftRadius: "8px",
-                padding: "10px 16px",
+                padding: "0 16px",
+                height: "42px",
                 flex: 1,
                 outline: "none",
               }}
@@ -679,7 +728,8 @@ export default function ReviewResults({
                 border: "none",
                 borderTopRightRadius: "8px",
                 borderBottomRightRadius: "8px",
-                padding: "10px 20px",
+                padding: "0 20px",
+                height: "42px",
                 cursor: "pointer",
               }}
             >
@@ -697,7 +747,7 @@ export default function ReviewResults({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-5 pt-8">
+        <div className="flex flex-col gap-6" style={{ marginTop: "30px" }}>
           {typeof onFixResume === "function" && (
             <div className="flex flex-col gap-4">
               <button
@@ -705,7 +755,7 @@ export default function ReviewResults({
                 onClick={onFixResume}
                 disabled={isFixing}
                 className={[
-                  "mt-[30px] w-full inline-flex justify-center items-center px-5 h-[50px] rounded-[10px] font-bold text-white transition-colors",
+                  "w-full inline-flex justify-center items-center px-5 h-[50px] rounded-[10px] font-bold text-white transition-colors",
                   isFixing ? "cursor-not-allowed opacity-70" : "hover:brightness-110",
                 ].join(" ")}
                 style={{ backgroundColor: "#16a34a" }}
