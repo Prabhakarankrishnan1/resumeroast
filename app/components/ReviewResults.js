@@ -287,7 +287,7 @@ export default function ReviewResults({
             width: "100%",
             backgroundColor: "#111827",
             border: "1px solid #1e293b",
-            borderRadius: "12px",
+            borderRadius: "8px",
             padding: "24px",
             position: "relative",
           }}
@@ -432,7 +432,7 @@ export default function ReviewResults({
                   key={section.name ?? idx}
                   style={{
                     backgroundColor: "#111827",
-                    borderLeft: `3px solid ${sectionColor}`,
+                    border: "1px solid #1e293b",
                     padding: "16px",
                     marginBottom: "10px",
                     borderRadius: "8px",
@@ -520,10 +520,11 @@ export default function ReviewResults({
 
         {(atsIssues.length > 0 || atsKeywords.length > 0) && (
           <div
-            className="w-full rounded-xl overflow-hidden"
+            className="w-full overflow-hidden"
             style={{
-              backgroundColor: "#0d0d0d",
-              border: "1px solid #262626",
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderRadius: "8px",
             }}
           >
             <button
@@ -531,17 +532,15 @@ export default function ReviewResults({
               onClick={() => setShowAtsDetails((prev) => !prev)}
               className="w-full flex items-center justify-between text-left"
               style={{
-                backgroundColor: "#1a1a1a",
+                backgroundColor: "#111827",
                 padding: "14px 20px",
-                borderRadius: "8px",
-                borderLeft: "3px solid #ff6b35",
                 cursor: "pointer",
               }}
             >
-              <span className="text-sm font-bold" style={{ color: "#ff6b35" }}>
+              <span className="text-sm font-bold" style={{ color: "#ffffff" }}>
                 ATS Details — Issues & Keywords
               </span>
-              <span className="text-sm" style={{ color: "#ff6b35" }}>
+              <span className="text-sm" style={{ color: "#94a3b8" }}>
                 {showAtsDetails ? "▲" : "▼"}
               </span>
             </button>
@@ -651,35 +650,68 @@ export default function ReviewResults({
 
         {/* Top 3 improvements + Elevator pitch */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-[#050505] border border-[#ff6b35]/60 rounded-2xl p-5 shadow-lg shadow-black/40">
-            <h3 className="text-lg font-semibold mb-3 text-[#ff6b35]">
-              Top 3 Improvements
+          <div
+            style={{
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderRadius: "8px",
+              padding: "20px",
+            }}
+          >
+            <h3
+              style={{
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: 700,
+                margin: "0 0 12px 0",
+              }}
+            >
+              💡 Top 3 Improvements
             </h3>
-            <ol className="list-decimal pl-5 space-y-2 text-gray-100">
+            <ol style={{ paddingLeft: "20px", margin: 0 }}>
               {results?.topThreeImprovements?.map((item, index) => (
-                <li key={index} className="leading-relaxed">
+                <li
+                  key={index}
+                  style={{
+                    color: "#94a3b8",
+                    fontSize: "14px",
+                    lineHeight: 1.7,
+                    marginBottom: "6px",
+                  }}
+                >
                   {item}
                 </li>
               ))}
             </ol>
           </div>
 
-          <div className="bg-[#050505] border border-[#333] rounded-2xl p-4 shadow-lg shadow-black/40 flex flex-col gap-3">
+          <div
+            style={{
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderRadius: "8px",
+              padding: "20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-gray-100">
+              <h3 style={{ color: "#ffffff", fontSize: "16px", fontWeight: 700, margin: 0 }}>
                 Your Elevator Pitch
               </h3>
               <button
                 type="button"
                 onClick={handleCopyElevatorPitch}
-                className="text-xs px-3 py-1 rounded-full bg-[#ff6b35] text-black font-medium hover:bg-[#ff814f] active:scale-95 transition-transform"
+                className="text-xs px-3 py-1 rounded-full text-white font-medium active:scale-95 transition-transform"
+                style={{ backgroundColor: "#0d9488" }}
               >
                 Copy
               </button>
             </div>
-            <div className="relative pl-4 border-l-2 border-[#ff6b35]/70">
-              <p className="text-gray-100 italic leading-relaxed" style={{ fontSize: "14px" }}>
-                “{results?.elevatorPitch}”
+            <div>
+              <p style={{ color: "#cbd5e1", fontSize: "14px", lineHeight: 1.7, margin: 0 }}>
+                {results?.elevatorPitch}
               </p>
             </div>
           </div>
@@ -690,7 +722,7 @@ export default function ReviewResults({
             backgroundColor: "#111827",
             border: "1px solid #1e293b",
             padding: "20px",
-            borderRadius: "10px",
+            borderRadius: "8px",
           }}
         >
           <p style={{ color: "#fff", fontSize: "15px", margin: "0 0 10px 0" }}>
@@ -706,9 +738,9 @@ export default function ReviewResults({
                 if (subscribeSuccess) setSubscribeSuccess(false);
               }}
               style={{
-                backgroundColor: "#111",
+                backgroundColor: "#0a0a0a",
                 color: "#fff",
-                border: "1px solid #333",
+                border: "1px solid #1e293b",
                 borderRight: "none",
                 borderTopLeftRadius: "8px",
                 borderBottomLeftRadius: "8px",
@@ -722,7 +754,7 @@ export default function ReviewResults({
               type="button"
               onClick={handleSubscribe}
               style={{
-                backgroundColor: "#ff6b35",
+                backgroundColor: "#0d9488",
                 color: "#fff",
                 fontWeight: 700,
                 border: "none",
@@ -747,32 +779,35 @@ export default function ReviewResults({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-6" style={{ marginTop: "30px" }}>
+        <div
+          className="flex flex-col gap-3 items-center"
+          style={{ marginTop: "30px", width: "100%" }}
+        >
           {typeof onFixResume === "function" && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 items-center w-full">
               <button
                 type="button"
                 onClick={onFixResume}
                 disabled={isFixing}
                 className={[
-                  "w-full inline-flex justify-center items-center px-5 h-[50px] rounded-[10px] font-bold text-white transition-colors",
+                  "w-full max-w-[500px] inline-flex justify-center items-center px-5 h-[44px] rounded-[8px] text-[14px] font-semibold text-white transition-colors",
                   isFixing ? "cursor-not-allowed opacity-70" : "hover:brightness-110",
                 ].join(" ")}
-                style={{ backgroundColor: "#16a34a" }}
+                style={{ backgroundColor: "#0d9488" }}
               >
                 {isFixing
                   ? "Generating improved content..."
-                  : "Get AI-Improved Content ✨"}
+                  : "Get AI-Improved Content"}
               </button>
 
               {fixedResume && (
                 <div className="w-full flex flex-col gap-3">
                   <div
                     style={{
-                      backgroundColor: "#1a1a1a",
+                      backgroundColor: "#111827",
                       padding: "16px",
-                      borderRadius: "12px",
-                      border: "1px solid #262626",
+                      borderRadius: "8px",
+                      border: "1px solid #1e293b",
                     }}
                   >
                     <div className="flex items-center justify-between gap-3 mb-3">
@@ -829,17 +864,22 @@ export default function ReviewResults({
             type="button"
             onClick={handleShareScore}
             className={[
-              "w-full inline-flex justify-center items-center gap-2 px-5 h-[50px] rounded-full font-semibold text-lg shadow-md shadow-black/40 active:scale-95 transition-transform",
-              showCopied ? "text-white hover:bg-[#22c55e]" : "text-black hover:bg-[#ff814f]",
+              "w-full max-w-[500px] inline-flex justify-center items-center gap-2 px-5 h-[44px] rounded-[8px] font-semibold text-[14px] border active:scale-95 transition-colors",
+              showCopied
+                ? "bg-[#0d9488]"
+                : "bg-transparent hover:border-[#0d9488]",
             ].join(" ")}
-            style={{ backgroundColor: showCopied ? "#16a34a" : "#ff6b35" }}
+            style={{
+              color: "#ffffff",
+              borderColor: showCopied ? "#0d9488" : "#334155",
+            }}
           >
-            {showCopied ? "Copied! 📋" : "Share Your Score"}
+            {showCopied ? "Copied!" : "Share Your Score"}
           </button>
           <button
             type="button"
             onClick={handleReload}
-            className="w-full inline-flex justify-center items-center gap-2 px-5 h-[50px] rounded-full border-2 border-[#ff6b35] text-[#ff6b35] font-semibold text-lg bg-transparent hover:bg-[#ff6b35]/10 active:scale-95 transition-transform"
+            className="w-full max-w-[500px] inline-flex justify-center items-center gap-2 px-5 h-[44px] rounded-[8px] border border-[#334155] text-[14px] font-semibold bg-transparent text-[#94a3b8] hover:border-[#0d9488] active:scale-95 transition-colors"
           >
             Review Another Resume
           </button>

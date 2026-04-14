@@ -645,32 +645,24 @@ export default function Home() {
         </div>
       )}
 
-      <div
+      <footer
         style={{
           marginTop: "24px",
+          width: "100%",
+          borderTop: "1px solid #1e293b",
+          padding: "20px",
+          textAlign: "center",
           color: "#666",
           fontSize: "12px",
-          textAlign: "center",
-          maxWidth: "600px",
           lineHeight: 1.6,
         }}
       >
-        <p>
-          ResumeRoast (Resume Roast) is a free AI-powered tool that reviews your
-          resume and gives brutally honest feedback. Get your resume roasted by
-          AI with section scores, rewrite suggestions, and an elevator pitch.
-        </p>
-      </div>
-
-      <div
-        style={{
-          marginTop: "24px",
-          color: "#666",
-          fontSize: "12px",
-          textAlign: "center",
-          lineHeight: 1.6,
-        }}
-      >
+        <div style={{ maxWidth: "700px", margin: "0 auto" }}>
+          <p style={{ margin: "0 0 16px 0" }}>
+            ResumeRoast (Resume Roast) is a free AI-powered tool that reviews your
+            resume and gives brutally honest feedback. Get your resume roasted by
+            AI with section scores, rewrite suggestions, and an elevator pitch.
+          </p>
         <p>Built with 🔥 and Claude AI</p>
         <p style={{ fontSize: "13px" }}>
           <a
@@ -706,7 +698,8 @@ export default function Home() {
           resumeroast.in@gmail.com
         </p>
         <p>Your resume is processed securely and never stored</p>
-      </div>
+        </div>
+      </footer>
 
       {showContactForm && (
         <div
