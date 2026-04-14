@@ -569,6 +569,167 @@ export default function Home() {
             </span>
           </div>
 
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "480px",
+              marginTop: "14px",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "8px",
+              textAlign: "center",
+              background: "transparent",
+            }}
+          >
+            <div style={{ padding: "6px 4px" }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "clamp(16px, 4.2vw, 20px)",
+                  lineHeight: 1.1,
+                }}
+              >
+                500+
+              </p>
+              <p
+                style={{
+                  margin: "4px 0 0 0",
+                  color: "#94a3b8",
+                  fontSize: "clamp(10px, 2.6vw, 12px)",
+                  lineHeight: 1.35,
+                }}
+              >
+                Resumes Reviewed
+              </p>
+            </div>
+
+            <div style={{ padding: "6px 4px" }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "clamp(16px, 4.2vw, 20px)",
+                  lineHeight: 1.1,
+                }}
+              >
+                3
+              </p>
+              <p
+                style={{
+                  margin: "4px 0 0 0",
+                  color: "#94a3b8",
+                  fontSize: "clamp(10px, 2.6vw, 12px)",
+                  lineHeight: 1.35,
+                }}
+              >
+                Reviewer Styles
+              </p>
+            </div>
+
+            <div style={{ padding: "6px 4px" }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "clamp(16px, 4.2vw, 20px)",
+                  lineHeight: 1.1,
+                }}
+              >
+                30s
+              </p>
+              <p
+                style={{
+                  margin: "4px 0 0 0",
+                  color: "#94a3b8",
+                  fontSize: "clamp(10px, 2.6vw, 12px)",
+                  lineHeight: 1.35,
+                }}
+              >
+                Analysis
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "780px",
+              marginTop: "20px",
+            }}
+          >
+            <p
+              style={{
+                margin: "0 0 10px 0",
+                color: "#cbd5e1",
+                fontSize: "13px",
+                textAlign: "center",
+                letterSpacing: "0.2px",
+              }}
+            >
+              How It Works
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div
+                className="sm:max-h-[80px]"
+                style={{
+                  backgroundColor: "#111827",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  overflow: "hidden",
+                }}
+              >
+                <p style={{ margin: "0 0 4px 0", color: "#ffffff", fontSize: "14px", fontWeight: 600 }}>
+                  <span style={{ color: "#0d9488", marginRight: "6px" }}>1.</span> 📄 Upload
+                </p>
+                <p style={{ margin: 0, color: "#94a3b8", fontSize: "12px", lineHeight: 1.4 }}>
+                  Drop your resume PDF or Word doc
+                </p>
+              </div>
+
+              <div
+                className="sm:max-h-[80px]"
+                style={{
+                  backgroundColor: "#111827",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  overflow: "hidden",
+                }}
+              >
+                <p style={{ margin: "0 0 4px 0", color: "#ffffff", fontSize: "14px", fontWeight: 600 }}>
+                  <span style={{ color: "#0d9488", marginRight: "6px" }}>2.</span> 🎭 Choose
+                </p>
+                <p style={{ margin: 0, color: "#94a3b8", fontSize: "12px", lineHeight: 1.4 }}>
+                  Pick Kind Coach, Tough HM, or Brutally Honest Friend
+                </p>
+              </div>
+
+              <div
+                className="sm:max-h-[80px]"
+                style={{
+                  backgroundColor: "#111827",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  overflow: "hidden",
+                }}
+              >
+                <p style={{ margin: "0 0 4px 0", color: "#ffffff", fontSize: "14px", fontWeight: 600 }}>
+                  <span style={{ color: "#0d9488", marginRight: "6px" }}>3.</span> 🔥 Get Roasted
+                </p>
+                <p style={{ margin: 0, color: "#94a3b8", fontSize: "12px", lineHeight: 1.4 }}>
+                  Section scores, rewrite suggestions, ATS check, and more
+                </p>
+              </div>
+            </div>
+          </div>
+
           {fileError && (
             <div className="mt-3 max-w-[500px] mx-auto border border-red-500/70 bg-[#2a0b0b] text-red-300 text-sm rounded-md px-3 py-2">
               {fileError}
@@ -647,57 +808,52 @@ export default function Home() {
 
       <footer
         style={{
-          marginTop: "24px",
+          marginTop: "28px",
           width: "100%",
+          backgroundColor: "#0a0a0a",
           borderTop: "1px solid #1e293b",
           padding: "20px",
-          textAlign: "center",
-          color: "#666",
-          fontSize: "12px",
-          lineHeight: 1.6,
         }}
       >
-        <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-          <p style={{ margin: "0 0 16px 0" }}>
-            ResumeRoast (Resume Roast) is a free AI-powered tool that reviews your
-            resume and gives brutally honest feedback. Get your resume roasted by
-            AI with section scores, rewrite suggestions, and an elevator pitch.
+        <div
+          className="max-w-[980px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3"
+          style={{ color: "#94a3b8", fontSize: "12px", lineHeight: 1.5, textAlign: "center" }}
+        >
+          <p style={{ margin: 0, color: "#94a3b8" }}>© 2026 ResumeRoast</p>
+
+          <div className="flex items-center" style={{ color: "#cbd5e1" }}>
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdjmv_PXk5RWj5xlhGbZCyYjwm5JYTNLwYqO0Ol6yFLcCC7FA/viewform?usp=header"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#cbd5e1", textDecoration: "none" }}
+            >
+              Feedback
+            </a>
+            <span style={{ margin: "0 12px", color: "#64748b" }}>·</span>
+            <button
+              type="button"
+              onClick={() => setShowContactForm(true)}
+              style={{
+                color: "#cbd5e1",
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontSize: "12px",
+              }}
+            >
+              Contact Us
+            </button>
+            <span style={{ margin: "0 12px", color: "#64748b" }}>·</span>
+            <a href="#" style={{ color: "#cbd5e1", textDecoration: "none" }}>
+              Privacy
+            </a>
+          </div>
+
+          <p style={{ margin: 0, color: "#94a3b8" }}>
+            Built with 🔥 and AI — Your data is never stored
           </p>
-        <p>Built with 🔥 and Claude AI</p>
-        <p style={{ fontSize: "13px" }}>
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSdjmv_PXk5RWj5xlhGbZCyYjwm5JYTNLwYqO0Ol6yFLcCC7FA/viewform?usp=header"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#ff6b35", textDecoration: "none" }}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
-          >
-            Feedback
-          </a>{" "}
-          •{" "}
-          <button
-            type="button"
-            onClick={() => setShowContactForm(true)}
-            style={{
-              color: "#ff6b35",
-              textDecoration: "none",
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              fontSize: "13px",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
-          >
-            Contact Us
-          </button>
-        </p>
-        <p style={{ color: "#666", fontSize: "12px", marginTop: "6px" }}>
-          resumeroast.in@gmail.com
-        </p>
-        <p>Your resume is processed securely and never stored</p>
         </div>
       </footer>
 
