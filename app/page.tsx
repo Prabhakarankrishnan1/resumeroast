@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ReviewResults from "./components/ReviewResults";
+import TopNav from "./components/TopNav";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -203,103 +204,10 @@ export default function Home() {
     }
   };
 
-  const TopNav = () => (
-    <>
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          backgroundColor: "#0a0a0a",
-          borderBottom: "1px solid #1a1a1a",
-          padding: "12px 24px",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "900px",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <a
-            href="/"
-            style={{
-              color: "#fff",
-              textDecoration: "none",
-              fontWeight: 700,
-              fontSize: "18px",
-            }}
-          >
-            🔥 ResumeRoast
-          </a>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-            <a
-              href="/"
-              className="top-nav-link"
-              style={{
-                color: "#ffffff",
-                textDecoration: "none",
-                paddingBottom: "4px",
-                borderBottom: "2px solid #ff6b35",
-                fontWeight: 600,
-                fontSize: "14px",
-              }}
-            >
-              Resume Review
-            </a>
-
-            <span
-              className="top-nav-link"
-              style={{
-                color: "#8a8a8a",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                fontSize: "14px",
-                fontWeight: 500,
-              }}
-            >
-              SkillPrint
-              <span
-                style={{
-                  fontSize: "10px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
-                  color: "#b9b9b9",
-                  border: "1px solid #404040",
-                  borderRadius: "999px",
-                  padding: "2px 6px",
-                  lineHeight: 1.2,
-                }}
-              >
-                Coming Soon
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .top-nav-link {
-            font-size: 13px !important;
-          }
-        }
-      `}</style>
-    </>
-  );
-
   if (isLoading) {
     return (
       <>
-        <TopNav />
+        <TopNav activePage="resume-review" />
         <div
           className="min-h-screen flex flex-col items-center justify-center text-center px-6"
           style={{
@@ -400,7 +308,7 @@ export default function Home() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <TopNav />
+      <TopNav activePage="resume-review" />
 
       {!results && (
         <div
