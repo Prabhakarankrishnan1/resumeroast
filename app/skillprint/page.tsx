@@ -1,6 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import TopNav from "../components/TopNav";
 
 const LOADING_MESSAGES = [
@@ -34,13 +43,110 @@ function isAllowedFile(file: File) {
   return name.endsWith(".pdf") || name.endsWith(".docx");
 }
 
+interface ExtractedSkill {
+  skill: string;
+  category: string;
+  proficiencyLevel: number;
+  yearsOfExperience: number;
+  evidenceFromResume: string;
+}
+
+interface Category {
+  name: string;
+  skills: string[];
+  averageProficiency: number;
+  marketImportance: number;
+}
+
+interface CriticalGap {
+  skill: string;
+  importance: string;
+  recommendation: string;
+}
+
+interface SkillData {
+  extractedSkills: ExtractedSkill[];
+  categories: Category[];
+  marketReadinessScore: number;
+  topStrengths: string[];
+  criticalGaps: CriticalGap[];
+  overallSummary: string;
+}
+
+const CARD_STYLE: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "700px",
+  backgroundColor: "#111827",
+  border: "1px solid #1e293b",
+  borderRadius: "12px",
+  padding: "20px",
+  boxSizing: "border-box",
+};
+
+function scoreColor(score: number) {
+  if (score < 40) return "#ef4444";
+  if (score < 70) return "#f59e0b";
+  return "#22c55e";
+}
+
+function proficiencyColor(level: number) {
+  if (level <= 3) return "#ef4444";
+  if (level <= 6) return "#f59e0b";
+  return "#0d9488";
+}
+
+function CircularScore({ score }: { score: number }) {
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - score / 100);
+  const color = scoreColor(score);
+
+  return (
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <circle cx="70" cy="70" r={radius} fill="none" stroke="#1e293b" strokeWidth="10" />
+      <circle
+        cx="70"
+        cy="70"
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth="10"
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform="rotate(-90 70 70)"
+        style={{ transition: "stroke-dashoffset 0.8s ease" }}
+      />
+      <text x="70" y="65" textAnchor="middle" fill="#ffffff" fontSize="26" fontWeight="800">
+        {score}%
+      </text>
+      <text x="70" y="84" textAnchor="middle" fill="#94a3b8" fontSize="11">
+        Readiness
+      </text>
+    </svg>
+  );
+}
+
+function ProficiencyBar({ level }: { level: number }) {
+  const color = proficiencyColor(level);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div style={{ flex: 1, height: "6px", backgroundColor: "#1e293b", borderRadius: "999px", overflow: "hidden" }}>
+        <div style={{ width: `${level * 10}%`, height: "100%", backgroundColor: color, borderRadius: "999px" }} />
+      </div>
+      <span style={{ fontSize: "12px", color, fontWeight: 700, minWidth: "16px" }}>{level}</span>
+    </div>
+  );
+}
+
 export default function SkillPrint() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [targetRole, setTargetRole] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [skillData, setSkillData] = useState<object | null>(null);
+  const [skillData, setSkillData] = useState<SkillData | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (!isAnalyzing) {
@@ -111,6 +217,18 @@ export default function SkillPrint() {
     }
   };
 
+  const handleShare = async () => {
+    const text = `My SkillPrint: I'm ${skillData!.marketReadinessScore}% ready for ${targetRole}! 🎯 Check yours at resumeroast.in/skillprint`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
+      alert(text);
+    }
+  };
+
+  // ── Loading screen ──────────────────────────────────────────────────────────
   if (isAnalyzing) {
     return (
       <>
@@ -125,9 +243,8 @@ export default function SkillPrint() {
             alignItems: "center",
             justifyContent: "center",
             fontFamily: "Arial, sans-serif",
-            paddingTop: "60px",
             textAlign: "center",
-            padding: "60px 20px 20px",
+            padding: "80px 20px 20px",
           }}
         >
           <style jsx>{`
@@ -186,6 +303,298 @@ export default function SkillPrint() {
     );
   }
 
+  // ── Results dashboard ───────────────────────────────────────────────────────
+  if (skillData) {
+    const radarData = skillData.categories.map((cat) => ({
+      category: cat.name,
+      "Your Skills": cat.averageProficiency,
+      "Market Demand": cat.marketImportance,
+    }));
+
+    const sortedSkills = [...skillData.extractedSkills].sort(
+      (a, b) => b.proficiencyLevel - a.proficiencyLevel
+    );
+
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#0a0a0a",
+          color: "#ffffff",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "80px 20px 48px",
+          fontFamily: "Arial, sans-serif",
+          gap: "16px",
+        }}
+      >
+        <TopNav activePage="skillprint" />
+
+        <style jsx>{`
+          @media (max-width: 640px) {
+            .radar-height { height: 280px !important; }
+          }
+        `}</style>
+
+        {/* Header */}
+        <div style={{ width: "100%", maxWidth: "700px", textAlign: "center", marginBottom: "4px" }}>
+          <h1 style={{ fontSize: "clamp(22px, 5vw, 32px)", fontWeight: 800, margin: "0 0 4px 0" }}>
+            🎯 Your SkillPrint
+          </h1>
+          <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>
+            {targetRole} · {skillData.extractedSkills.length} skills detected
+          </p>
+        </div>
+
+        {/* Market Readiness Score */}
+        <div style={CARD_STYLE}>
+          <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+            Market Readiness Score
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
+            <CircularScore score={skillData.marketReadinessScore} />
+            <div style={{ flex: 1, minWidth: "200px" }}>
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  backgroundColor: `${scoreColor(skillData.marketReadinessScore)}22`,
+                  color: scoreColor(skillData.marketReadinessScore),
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  marginBottom: "10px",
+                }}
+              >
+                {skillData.marketReadinessScore < 40
+                  ? "Needs Work"
+                  : skillData.marketReadinessScore < 70
+                  ? "On Track"
+                  : "Strong Match"}
+              </div>
+              <p style={{ color: "#94a3b8", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
+                {skillData.overallSummary}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Radar Chart */}
+        <div style={CARD_STYLE}>
+          <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+            Skill Radar
+          </p>
+          <div className="radar-height" style={{ height: "350px" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+                <PolarGrid stroke="#1e293b" />
+                <PolarAngleAxis
+                  dataKey="category"
+                  tick={{ fill: "#94a3b8", fontSize: 11 }}
+                />
+                <PolarRadiusAxis
+                  angle={90}
+                  domain={[0, 10]}
+                  tick={{ fill: "#4b5563", fontSize: 10 }}
+                  tickCount={6}
+                />
+                <Radar
+                  name="Your Skills"
+                  dataKey="Your Skills"
+                  stroke="#0d9488"
+                  fill="#0d9488"
+                  fillOpacity={0.4}
+                />
+                <Radar
+                  name="Market Demand"
+                  dataKey="Market Demand"
+                  stroke="#f59e0b"
+                  fill="#f59e0b"
+                  fillOpacity={0}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: "13px", color: "#94a3b8", paddingTop: "8px" }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Strengths + Gaps row */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "700px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {/* Strengths */}
+          <div
+            style={{
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderLeft: "3px solid #22c55e",
+              borderRadius: "12px",
+              padding: "20px",
+            }}
+          >
+            <p style={{ margin: "0 0 14px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+              Your Strengths 💪
+            </p>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
+              {skillData.topStrengths.map((s, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                  <span style={{ color: "#22c55e", marginTop: "1px", flexShrink: 0 }}>✓</span>
+                  <span style={{ color: "#cbd5e1", fontSize: "14px", lineHeight: 1.45 }}>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Critical Gaps */}
+          <div
+            style={{
+              backgroundColor: "#111827",
+              border: "1px solid #1e293b",
+              borderLeft: "3px solid #ef4444",
+              borderRadius: "12px",
+              padding: "20px",
+            }}
+          >
+            <p style={{ margin: "0 0 14px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+              Critical Gaps 🎯
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              {skillData.criticalGaps.map((gap, i) => (
+                <div key={i}>
+                  <p style={{ margin: "0 0 2px 0", fontWeight: 700, fontSize: "14px", color: "#f1f5f9" }}>
+                    {gap.skill}
+                  </p>
+                  <p style={{ margin: "0 0 4px 0", fontSize: "12px", color: "#94a3b8", lineHeight: 1.4 }}>
+                    {gap.importance}
+                  </p>
+                  <p style={{ margin: 0, fontSize: "12px", color: "#0d9488", lineHeight: 1.4 }}>
+                    → {gap.recommendation}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Skills table */}
+        <div style={CARD_STYLE}>
+          <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+            Detailed Skills
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {sortedSkills.map((skill, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto",
+                  gap: "8px 16px",
+                  alignItems: "center",
+                  padding: "10px 0",
+                  borderBottom: i < sortedSkills.length - 1 ? "1px solid #1e293b" : "none",
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 600, fontSize: "14px", color: "#f1f5f9" }}>{skill.skill}</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#64748b",
+                        backgroundColor: "#0f172a",
+                        border: "1px solid #1e293b",
+                        borderRadius: "999px",
+                        padding: "1px 8px",
+                      }}
+                    >
+                      {skill.category}
+                    </span>
+                    {skill.yearsOfExperience > 0 && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#94a3b8",
+                          backgroundColor: "#1e293b",
+                          borderRadius: "999px",
+                          padding: "1px 8px",
+                        }}
+                      >
+                        {skill.yearsOfExperience}y
+                      </span>
+                    )}
+                  </div>
+                  <ProficiencyBar level={skill.proficiencyLevel} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "700px",
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            onClick={handleShare}
+            style={{
+              flex: 1,
+              minWidth: "200px",
+              height: "44px",
+              fontSize: "14px",
+              fontWeight: 700,
+              borderRadius: "8px",
+              border: "1px solid #0d9488",
+              backgroundColor: copySuccess ? "#0d9488" : "transparent",
+              color: copySuccess ? "#ffffff" : "#0d9488",
+              cursor: "pointer",
+              transition: "background-color 180ms ease, color 180ms ease",
+            }}
+          >
+            {copySuccess ? "Copied! ✓" : "Share My SkillPrint 📤"}
+          </button>
+
+          <button
+            onClick={() => {
+              setSkillData(null);
+              setSelectedFile(null);
+              setTargetRole("");
+            }}
+            style={{
+              flex: 1,
+              minWidth: "200px",
+              height: "44px",
+              fontSize: "14px",
+              fontWeight: 700,
+              borderRadius: "8px",
+              border: "1px solid #334155",
+              backgroundColor: "transparent",
+              color: "#94a3b8",
+              cursor: "pointer",
+            }}
+          >
+            Analyze Another Resume
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Upload form ─────────────────────────────────────────────────────────────
   return (
     <div
       style={{
@@ -201,7 +610,6 @@ export default function SkillPrint() {
     >
       <TopNav activePage="skillprint" />
 
-      {/* Header */}
       <div
         style={{
           width: "100%",
@@ -232,18 +640,7 @@ export default function SkillPrint() {
         </p>
       </div>
 
-      {/* Upload card */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "700px",
-          backgroundColor: "#111827",
-          border: "1px solid #1e293b",
-          borderRadius: "12px",
-          padding: "24px",
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
-        }}
-      >
+      <div style={CARD_STYLE}>
         {/* File drop zone */}
         <div
           onDrop={handleDrop}
@@ -290,9 +687,7 @@ export default function SkillPrint() {
               <p style={{ fontSize: "15px", color: "#e5e7eb", marginBottom: "4px" }}>
                 Drop your resume here
               </p>
-              <p style={{ fontSize: "12px", color: "#94a3b8" }}>
-                PDF or DOCX, max 10MB
-              </p>
+              <p style={{ fontSize: "12px", color: "#94a3b8" }}>PDF or DOCX, max 10MB</p>
             </>
           )}
           <input
@@ -305,9 +700,7 @@ export default function SkillPrint() {
         </div>
 
         {fileError && (
-          <p style={{ color: "#f87171", fontSize: "13px", margin: "0 0 14px 0" }}>
-            {fileError}
-          </p>
+          <p style={{ color: "#f87171", fontSize: "13px", margin: "0 0 14px 0" }}>{fileError}</p>
         )}
 
         {/* Target role dropdown */}
@@ -346,18 +739,13 @@ export default function SkillPrint() {
               backgroundPosition: "right 14px center",
             }}
           >
-            <option value="" disabled style={{ color: "#64748b" }}>
-              Select a role...
-            </option>
+            <option value="" disabled>Select a role...</option>
             {TARGET_ROLES.map((role) => (
-              <option key={role} value={role} style={{ color: "#e5e7eb", backgroundColor: "#1e293b" }}>
-                {role}
-              </option>
+              <option key={role} value={role}>{role}</option>
             ))}
           </select>
         </div>
 
-        {/* Generate button */}
         <button
           onClick={handleAnalyze}
           disabled={!canGenerate}
@@ -374,11 +762,10 @@ export default function SkillPrint() {
             transition: "background-color 180ms ease",
           }}
         >
-          {isAnalyzing ? "Analyzing..." : "Generate SkillPrint 🎯"}
+          Generate SkillPrint 🎯
         </button>
       </div>
 
-      {/* Placeholder chart area */}
       <div
         style={{
           width: "100%",
@@ -401,10 +788,6 @@ export default function SkillPrint() {
           border-color: #0d9488 !important;
           box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.35),
             0 0 18px rgba(13, 148, 136, 0.15);
-        }
-        select option {
-          background-color: #1e293b;
-          color: #e5e7eb;
         }
       `}</style>
     </div>
