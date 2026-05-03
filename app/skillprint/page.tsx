@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TopNav from "../components/TopNav";
+
+const LOADING_MESSAGES = [
+  "Extracting your skills...",
+  "Comparing against market demand...",
+  "Building your skill map...",
+  "Calculating your readiness score...",
+];
 
 const TARGET_ROLES = [
   "Software Developer",
@@ -33,6 +40,18 @@ export default function SkillPrint() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [skillData, setSkillData] = useState<object | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isAnalyzing) {
+      setLoadingMessageIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [isAnalyzing]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,12 +90,101 @@ export default function SkillPrint() {
 
   const canGenerate = !!selectedFile && !!targetRole && !isAnalyzing;
 
-  const handleGenerate = async () => {
+  const handleAnalyze = async () => {
     if (!canGenerate) return;
     setIsAnalyzing(true);
-    // TODO: wire up API
-    setIsAnalyzing(false);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile!);
+      formData.append("targetRole", targetRole);
+      const res = await fetch("/api/skillprint", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Something went wrong. Please try again.");
+      } else {
+        setSkillData(data);
+      }
+    } catch {
+      alert("Failed to connect. Please check your connection and try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
+
+  if (isAnalyzing) {
+    return (
+      <>
+        <TopNav activePage="skillprint" />
+        <div
+          style={{
+            minHeight: "100vh",
+            backgroundColor: "#0a0a0a",
+            color: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "Arial, sans-serif",
+            paddingTop: "60px",
+            textAlign: "center",
+            padding: "60px 20px 20px",
+          }}
+        >
+          <style jsx>{`
+            @keyframes targetPulse {
+              0% { transform: scale(1); }
+              50% { transform: scale(1.3); }
+              100% { transform: scale(1); }
+            }
+            @keyframes messageFade {
+              0% { opacity: 0.1; }
+              20% { opacity: 1; }
+              80% { opacity: 1; }
+              100% { opacity: 0.1; }
+            }
+            @keyframes progressFill {
+              0% { width: 5%; }
+              100% { width: 90%; }
+            }
+          `}</style>
+
+          <div style={{ fontSize: "60px", animation: "targetPulse 1s ease-in-out infinite", marginBottom: "24px" }}>
+            🎯
+          </div>
+
+          <p
+            key={loadingMessageIndex}
+            style={{
+              color: "#0d9488",
+              fontSize: "17px",
+              fontWeight: 500,
+              minHeight: "28px",
+              marginBottom: "20px",
+              animation: "messageFade 2.5s ease-in-out",
+            }}
+          >
+            {LOADING_MESSAGES[loadingMessageIndex]}
+          </p>
+
+          <div style={{ width: "100%", maxWidth: "300px", height: "6px", backgroundColor: "#1e293b", borderRadius: "999px", overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                borderRadius: "999px",
+                backgroundColor: "#0d9488",
+                width: "5%",
+                animation: "progressFill 30s linear forwards",
+              }}
+            />
+          </div>
+
+          <p style={{ marginTop: "16px", fontSize: "12px", color: "#4b5563" }}>
+            This usually takes 15–30 seconds.
+          </p>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div
@@ -251,7 +359,7 @@ export default function SkillPrint() {
 
         {/* Generate button */}
         <button
-          onClick={handleGenerate}
+          onClick={handleAnalyze}
           disabled={!canGenerate}
           style={{
             width: "100%",
