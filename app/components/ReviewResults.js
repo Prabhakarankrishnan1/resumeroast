@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 
@@ -776,6 +777,41 @@ export default function ReviewResults({
           <p style={{ color: "#666", fontSize: "11px", margin: "8px 0 0 0" }}>
             No spam, ever. Unsubscribe anytime.
           </p>
+        </div>
+
+        {/* SkillPrint promo */}
+        <div
+          style={{
+            backgroundColor: "#111827",
+            border: "1px solid #1e293b",
+            borderLeft: "3px solid #0d9488",
+            borderRadius: "12px",
+            padding: "20px",
+          }}
+        >
+          <p style={{ margin: "0 0 6px 0", fontSize: "16px", fontWeight: 700, color: "#0d9488" }}>
+            Want to know what to learn next? 🎯
+          </p>
+          <p style={{ margin: "0 0 16px 0", fontSize: "14px", color: "#94a3b8", lineHeight: 1.6 }}>
+            SkillPrint maps your skills against market demand and gives you a personalized learning roadmap.
+          </p>
+          <Link
+            href="/skillprint"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              height: "38px",
+              padding: "0 18px",
+              borderRadius: "8px",
+              backgroundColor: "#0d9488",
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            View My SkillPrint →
+          </Link>
         </div>
 
         {/* Actions */}
