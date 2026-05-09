@@ -375,7 +375,7 @@ export default function SkillPrint() {
         `}</style>
 
         {/* Header */}
-        <div style={{ width: "100%", maxWidth: "700px", textAlign: "center", marginBottom: "4px" }}>
+        <div style={{ width: "100%", maxWidth: "700px", textAlign: "center" }}>
           <h1 style={{ fontSize: "clamp(22px, 5vw, 32px)", fontWeight: 800, margin: "0 0 4px 0" }}>
             🎯 Your SkillPrint
           </h1>
@@ -464,7 +464,7 @@ export default function SkillPrint() {
             width: "100%",
             maxWidth: "700px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: "16px",
           }}
         >
