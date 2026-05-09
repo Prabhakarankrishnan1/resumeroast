@@ -1,5 +1,6 @@
 import { createRequire } from "module";
 import { NextResponse } from "next/server";
+import { supabase } from "../../lib/supabase";
 
 const require = createRequire(import.meta.url);
 const mammoth = require("mammoth");
@@ -201,6 +202,51 @@ export async function POST(request) {
         );
       }
     }
+
+    // ── Enhance with database data ────────────────────────────────────────────
+    const [{ data: roleSkills }, { data: salaryData }] = await Promise.all([
+      supabase.from("role_skills").select("*").eq("role_name", targetRole),
+      supabase.from("salary_benchmarks").select("*").eq("role_name", targetRole),
+    ]);
+
+    if (roleSkills?.length) {
+      const skillMap = new Map(
+        roleSkills.map((row) => [row.skill_name.toLowerCase(), row])
+      );
+
+      // Enhance criticalGaps
+      if (Array.isArray(result.criticalGaps)) {
+        result.criticalGaps = result.criticalGaps.map((gap) => {
+          const match = skillMap.get(gap.skill?.toLowerCase());
+          if (!match) return gap;
+          return {
+            ...gap,
+            learning_resource_name: match.learning_resource_name ?? null,
+            learning_resource_url: match.learning_resource_url ?? null,
+            learning_resource_type: match.learning_resource_type ?? null,
+            demand_trend: match.demand_trend ?? null,
+            dataEnhanced: true,
+          };
+        });
+      }
+
+      // Enhance extractedSkills with demand_trend
+      if (Array.isArray(result.extractedSkills)) {
+        result.extractedSkills = result.extractedSkills.map((skill) => {
+          const match = skillMap.get(skill.skill?.toLowerCase());
+          if (!match?.demand_trend) return skill;
+          return { ...skill, demand_trend: match.demand_trend };
+        });
+      }
+    }
+
+    result.salaryBenchmarks = salaryData ?? [];
+
+    // ── Log the scan ─────────────────────────────────────────────────────────
+    await supabase.from("skillprint_scans").insert({
+      target_role: targetRole,
+      market_readiness_score: result.marketReadinessScore,
+    });
 
     return NextResponse.json(result);
   } catch (error) {

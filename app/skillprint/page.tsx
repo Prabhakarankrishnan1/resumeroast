@@ -49,6 +49,7 @@ interface ExtractedSkill {
   proficiencyLevel: number;
   yearsOfExperience: number;
   evidenceFromResume: string;
+  demand_trend?: string;
 }
 
 interface Category {
@@ -62,6 +63,19 @@ interface CriticalGap {
   skill: string;
   importance: string;
   recommendation: string;
+  learning_resource_name?: string;
+  learning_resource_url?: string;
+  learning_resource_type?: string;
+  demand_trend?: string;
+  dataEnhanced?: boolean;
+}
+
+interface SalaryBenchmark {
+  experience?: string;
+  experience_level?: string;
+  city?: string;
+  min_salary?: number;
+  max_salary?: number;
 }
 
 interface SkillData {
@@ -71,6 +85,7 @@ interface SkillData {
   topStrengths: string[];
   criticalGaps: CriticalGap[];
   overallSummary: string;
+  salaryBenchmarks: SalaryBenchmark[];
 }
 
 const CARD_STYLE: React.CSSProperties = {
@@ -468,74 +483,183 @@ export default function SkillPrint() {
               Critical Gaps 🎯
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              {skillData.criticalGaps.map((gap, i) => (
-                <div key={i}>
-                  <p style={{ margin: "0 0 2px 0", fontWeight: 700, fontSize: "14px", color: "#f1f5f9" }}>
-                    {gap.skill}
-                  </p>
-                  <p style={{ margin: "0 0 4px 0", fontSize: "12px", color: "#94a3b8", lineHeight: 1.4 }}>
-                    {gap.importance}
-                  </p>
-                  <p style={{ margin: 0, fontSize: "12px", color: "#0d9488", lineHeight: 1.4 }}>
-                    → {gap.recommendation}
-                  </p>
-                </div>
-              ))}
+              {skillData.criticalGaps.map((gap, i) => {
+                const resourceTypeBadge = (() => {
+                  if (!gap.learning_resource_type) return null;
+                  const isFreeCourse = gap.learning_resource_type === "free_course";
+                  const isPaidCourse = gap.learning_resource_type === "paid_course";
+                  return {
+                    label: isFreeCourse ? "Free" : isPaidCourse ? "Paid" : gap.learning_resource_type,
+                    color: isFreeCourse ? "#22c55e" : isPaidCourse ? "#f59e0b" : "#94a3b8",
+                    bg: isFreeCourse ? "rgba(34,197,94,0.12)" : isPaidCourse ? "rgba(245,158,11,0.12)" : "rgba(148,163,184,0.12)",
+                  };
+                })();
+                return (
+                  <div key={i}>
+                    <p style={{ margin: "0 0 2px 0", fontWeight: 700, fontSize: "14px", color: "#f1f5f9" }}>
+                      {gap.skill}
+                    </p>
+                    <p style={{ margin: "0 0 4px 0", fontSize: "12px", color: "#94a3b8", lineHeight: 1.4 }}>
+                      {gap.importance}
+                    </p>
+                    <p style={{ margin: "0 0 6px 0", fontSize: "12px", color: "#0d9488", lineHeight: 1.4 }}>
+                      → {gap.recommendation}
+                    </p>
+                    {gap.learning_resource_url && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                        <a
+                          href={gap.learning_resource_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: "12px",
+                            color: "#0d9488",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          📚 {gap.learning_resource_name ?? "View Resource"}
+                        </a>
+                        {resourceTypeBadge && (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              color: resourceTypeBadge.color,
+                              backgroundColor: resourceTypeBadge.bg,
+                              borderRadius: "999px",
+                              padding: "2px 8px",
+                            }}
+                          >
+                            {resourceTypeBadge.label}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
+
+        {/* Salary Benchmarks */}
+        {skillData.salaryBenchmarks?.length > 0 && (
+          <div style={CARD_STYLE}>
+            <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+              Salary Benchmarks 💰
+            </p>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                <thead>
+                  <tr>
+                    {["Experience", "City", "Range"].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: "left",
+                          padding: "8px 12px",
+                          color: "#64748b",
+                          fontWeight: 600,
+                          borderBottom: "1px solid #1e293b",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {skillData.salaryBenchmarks.map((row, i) => {
+                    const min = row.min_salary != null ? (row.min_salary / 100000).toFixed(1) : null;
+                    const max = row.max_salary != null ? (row.max_salary / 100000).toFixed(1) : null;
+                    const range = min && max ? `₹${min} – ₹${max} LPA` : "—";
+                    const experience = row.experience ?? row.experience_level ?? "—";
+                    return (
+                      <tr key={i} style={{ borderBottom: i < skillData.salaryBenchmarks.length - 1 ? "1px solid #0f172a" : "none" }}>
+                        <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{experience}</td>
+                        <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{row.city ?? "—"}</td>
+                        <td style={{ padding: "10px 12px", color: "#0d9488", fontWeight: 600 }}>{range}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Skills table */}
         <div style={CARD_STYLE}>
           <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
             Detailed Skills
           </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {sortedSkills.map((skill, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  gap: "8px 16px",
-                  alignItems: "center",
-                  padding: "10px 0",
-                  borderBottom: i < sortedSkills.length - 1 ? "1px solid #1e293b" : "none",
-                }}
-              >
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 600, fontSize: "14px", color: "#f1f5f9" }}>{skill.skill}</span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#64748b",
-                        backgroundColor: "#0f172a",
-                        border: "1px solid #1e293b",
-                        borderRadius: "999px",
-                        padding: "1px 8px",
-                      }}
-                    >
-                      {skill.category}
-                    </span>
-                    {skill.yearsOfExperience > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+            {sortedSkills.map((skill, i) => {
+              const trend = (() => {
+                if (skill.demand_trend === "rising") return { symbol: "↑", color: "#22c55e" };
+                if (skill.demand_trend === "declining") return { symbol: "↓", color: "#ef4444" };
+                if (skill.demand_trend === "stable") return { symbol: "→", color: "#64748b" };
+                return null;
+              })();
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    gap: "8px 16px",
+                    alignItems: "center",
+                    padding: "10px 0",
+                    borderBottom: i < sortedSkills.length - 1 ? "1px solid #1e293b" : "none",
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 600, fontSize: "14px", color: "#f1f5f9" }}>{skill.skill}</span>
                       <span
                         style={{
                           fontSize: "11px",
-                          color: "#94a3b8",
-                          backgroundColor: "#1e293b",
+                          color: "#64748b",
+                          backgroundColor: "#0f172a",
+                          border: "1px solid #1e293b",
                           borderRadius: "999px",
                           padding: "1px 8px",
                         }}
                       >
-                        {skill.yearsOfExperience}y
+                        {skill.category}
                       </span>
+                      {skill.yearsOfExperience > 0 && (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#94a3b8",
+                            backgroundColor: "#1e293b",
+                            borderRadius: "999px",
+                            padding: "1px 8px",
+                          }}
+                        >
+                          {skill.yearsOfExperience}y
+                        </span>
+                      )}
+                    </div>
+                    <ProficiencyBar level={skill.proficiencyLevel} />
+                  </div>
+                  <div style={{ textAlign: "center", minWidth: "32px" }}>
+                    {trend ? (
+                      <span style={{ fontSize: "16px", fontWeight: 700, color: trend.color }} title={skill.demand_trend}>
+                        {trend.symbol}
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: "13px", color: "#334155" }}>—</span>
                     )}
                   </div>
-                  <ProficiencyBar level={skill.proficiencyLevel} />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
