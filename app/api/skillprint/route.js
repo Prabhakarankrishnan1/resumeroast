@@ -43,9 +43,12 @@ Return ONLY valid JSON, no other text, in exactly this format:
     {
       "skill": "Machine Learning",
       "importance": "Critical for ${targetRole} roles",
-      "recommendation": "Take Andrew Ng's ML course on Coursera"
+      "recommendation": "Take Andrew Ng's ML course on Coursera",
+      "estimatedLearningTime": "2-4 weeks",
+      "priority": 1
     }
   ],
+  "estimatedTimeToTarget": "3-4 months",
   "overallSummary": "2-3 sentence summary of the candidate's skill profile relative to the ${targetRole} role"
 }
 
@@ -56,6 +59,9 @@ Rules:
 - Extract every distinct skill mentioned in the resume — be thorough
 - Group skills into logical categories (e.g. Programming Languages, Frameworks, Cloud, Databases, Soft Skills, Tools)
 - criticalGaps should list the most impactful missing skills for the ${targetRole} role, with actionable recommendations
+- criticalGaps[].priority: integer starting at 1 (1 = highest priority gap to close)
+- criticalGaps[].estimatedLearningTime: realistic time to reach working proficiency (e.g. "1-2 weeks", "2-4 weeks", "1-2 months")
+- estimatedTimeToTarget: realistic total time for this candidate to become job-ready for ${targetRole} given their current skill level (e.g. "1-2 months", "3-6 months")
 - evidenceFromResume must reference actual text or context from the resume`;
 }
 
