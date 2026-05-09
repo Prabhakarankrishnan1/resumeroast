@@ -162,6 +162,7 @@ export default function SkillPrint() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<"yes" | "no" | null>(null);
 
   useEffect(() => {
     if (!isAnalyzing) {
@@ -230,6 +231,22 @@ export default function SkillPrint() {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleFeedback = (helpful: boolean) => {
+    const entry = {
+      date: new Date().toISOString(),
+      role: targetRole,
+      score: skillData?.marketReadinessScore ?? null,
+      helpful,
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem("skillprint-feedback") ?? "[]");
+      localStorage.setItem("skillprint-feedback", JSON.stringify([...existing, entry]));
+    } catch {
+      // localStorage unavailable — silently skip
+    }
+    setFeedbackGiven(helpful ? "yes" : "no");
   };
 
   const handleShare = async () => {
@@ -713,6 +730,59 @@ export default function SkillPrint() {
           >
             Analyze Another Resume
           </button>
+        </div>
+        {/* Feedback */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "700px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+            paddingTop: "4px",
+          }}
+        >
+          {feedbackGiven ? (
+            <p style={{ margin: 0, fontSize: "13px", color: "#0d9488" }}>
+              Thanks for your feedback!
+            </p>
+          ) : (
+            <>
+              <span style={{ fontSize: "13px", color: "#64748b" }}>
+                Was this analysis helpful?
+              </span>
+              <button
+                onClick={() => handleFeedback(true)}
+                style={{
+                  background: "none",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                  padding: "5px 14px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "#cbd5e1",
+                }}
+              >
+                👍 Yes
+              </button>
+              <button
+                onClick={() => handleFeedback(false)}
+                style={{
+                  background: "none",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                  padding: "5px 14px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "#cbd5e1",
+                }}
+              >
+                👎 No
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
