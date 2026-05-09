@@ -428,21 +428,24 @@ export default function SkillPrint() {
           </p>
         </div>
 
-        {/* Progress chart — only if 2+ history entries */}
-        {history.length > 1 && (() => {
-          const chartData = [...history].reverse().map((h) => ({
+        {/* Progress chart — only if 2+ entries for the same role */}
+        {(() => {
+          const roleHistory = history.filter((h) => h.targetRole === targetRole);
+          if (roleHistory.length < 2) return null;
+
+          const chartData = [...roleHistory].reverse().map((h) => ({
             date: formatShortDate(h.date),
             score: h.marketReadinessScore,
           }));
-          const oldest = history[history.length - 1];
-          const latest = history[0];
+          const oldest = roleHistory[roleHistory.length - 1];
+          const latest = roleHistory[0];
           const delta = latest.marketReadinessScore - oldest.marketReadinessScore;
           const deltaStr = `${delta >= 0 ? "+" : ""}${delta}%`;
 
           return (
             <div style={CARD_STYLE}>
               <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
-                Your Progress 📈
+                Your Progress for {targetRole} 📈
               </p>
               <div style={{ height: "200px" }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -454,7 +457,7 @@ export default function SkillPrint() {
                       contentStyle={{ backgroundColor: "#111827", border: "1px solid #1e293b", borderRadius: "8px", fontSize: "12px" }}
                       labelStyle={{ color: "#94a3b8" }}
                       itemStyle={{ color: "#0d9488" }}
-                      formatter={(v: number) => [`${v}%`, "Score"]}
+                      formatter={(v) => [`${v}%`, "Score"]}
                     />
                     <Line
                       type="monotone"
@@ -468,7 +471,7 @@ export default function SkillPrint() {
                 </ResponsiveContainer>
               </div>
               <p style={{ margin: "14px 0 4px 0", fontSize: "13px", color: "#0d9488", lineHeight: 1.5 }}>
-                You were <strong>{oldest.marketReadinessScore}%</strong> ready in {formatShortDate(oldest.date)}. Now you&apos;re <strong>{latest.marketReadinessScore}%</strong>. That&apos;s <strong>{deltaStr}</strong> growth!
+                You were <strong>{oldest.marketReadinessScore}%</strong> ready for {targetRole} in {formatShortDate(oldest.date)}. Now you&apos;re <strong>{latest.marketReadinessScore}%</strong>. That&apos;s <strong>{deltaStr}</strong> growth in {targetRole} readiness!
               </p>
               <p style={{ margin: 0, fontSize: "12px", color: "#4b5563" }}>
                 💡 Scan your resume monthly to track progress
@@ -1043,10 +1046,10 @@ export default function SkillPrint() {
           )}
         </div>
 
-        {/* First-scan tracking nudge */}
-        {history.length === 1 && (
+        {/* First-scan tracking nudge — only for this role */}
+        {history.filter((h) => h.targetRole === targetRole).length === 1 && (
           <p style={{ margin: 0, fontSize: "12px", color: "#4b5563", textAlign: "center" }}>
-            📈 Scan again next month to start tracking your progress
+            📈 Scan again next month to start tracking your progress for {targetRole}
           </p>
         )}
 
