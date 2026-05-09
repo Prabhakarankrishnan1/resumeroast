@@ -15,7 +15,46 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function buildSkillprintPrompt(targetRole) {
+const COUNTRY_CURRENCY = {
+  "India": "INR",
+  "United States": "USD",
+  "United Kingdom": "GBP",
+  "Singapore": "SGD",
+  "Canada": "CAD",
+  "Australia": "AUD",
+  "United Arab Emirates": "AED",
+  "Germany": "EUR",
+  "Pakistan": "PKR",
+  "Iran": "IRR",
+  "Jordan": "JOD",
+  "Philippines": "PHP",
+};
+
+function buildSalaryInstruction(targetRole, targetCountry, targetCity) {
+  const isOther = targetCountry.startsWith("Other");
+  const countryName = isOther ? "the candidate's country" : targetCountry;
+  const location = targetCity
+    ? `${targetCity}, ${isOther ? "their country" : targetCountry}`
+    : countryName;
+  const countryField = isOther ? (targetCity || "Unknown") : targetCountry;
+
+  return `
+
+ADDITIONALLY, include a "salaryEstimate" field in your JSON with estimated annual salary ranges for ${targetRole} in ${location} based on typical 2026 market rates:
+"salaryEstimate": {
+  "country": "${countryField}",
+  "city": "${targetCity}",
+  "currency": "<the appropriate currency code, e.g. PKR, IRR, JOD, PHP>",
+  "experienceRanges": [
+    { "experience": "0-2 years", "low": <annual amount in local currency>, "high": <annual amount> },
+    { "experience": "2-5 years", "low": <annual amount>, "high": <annual amount> },
+    { "experience": "5-10 years", "low": <annual amount>, "high": <annual amount> }
+  ],
+  "note": "AI-estimated based on typical 2026 market rates. Actual salaries may vary."
+}`;
+}
+
+function buildSkillprintPrompt(targetRole, salaryInstruction = "") {
   return `Analyze this resume against the target role: ${targetRole}
 
 Return ONLY valid JSON, no other text, in exactly this format:
@@ -62,7 +101,7 @@ Rules:
 - criticalGaps[].priority: integer starting at 1 (1 = highest priority gap to close)
 - criticalGaps[].estimatedLearningTime: realistic time to reach working proficiency (e.g. "1-2 weeks", "2-4 weeks", "1-2 months")
 - estimatedTimeToTarget: realistic total time for this candidate to become job-ready for ${targetRole} given their current skill level (e.g. "1-2 months", "3-6 months")
-- evidenceFromResume must reference actual text or context from the resume`;
+- evidenceFromResume must reference actual text or context from the resume${salaryInstruction}`;
 }
 
 async function callClaude(userContent, targetRole) {
@@ -108,6 +147,8 @@ export async function POST(request) {
     const formData = await request.formData();
     const file = formData.get("file");
     const targetRole = formData.get("targetRole");
+    const targetCountry = String(formData.get("targetCountry") || "India").trim();
+    const targetCity = String(formData.get("targetCity") || "").trim();
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -127,9 +168,29 @@ export async function POST(request) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
+    // Query salary DB and read file in parallel before calling Claude so we can
+    // conditionally include an AI salary-estimation instruction in the prompt.
+    let salaryQuery = supabase
+      .from("salary_benchmarks")
+      .select("*")
+      .eq("role_name", String(targetRole).trim());
+    if (targetCity) {
+      salaryQuery = salaryQuery.ilike("city", `%${targetCity}%`);
+    } else {
+      const currency = COUNTRY_CURRENCY[targetCountry];
+      if (currency) salaryQuery = salaryQuery.eq("currency", currency);
+    }
+
+    const [bytes, { data: salaryData }] = await Promise.all([
+      file.arrayBuffer(),
+      salaryQuery,
+    ]);
     const buffer = Buffer.from(bytes);
-    const prompt = buildSkillprintPrompt(String(targetRole).trim());
+    const hasSalaryData = Array.isArray(salaryData) && salaryData.length > 0;
+    const salaryInstruction = hasSalaryData
+      ? ""
+      : buildSalaryInstruction(String(targetRole).trim(), targetCountry, targetCity);
+    const prompt = buildSkillprintPrompt(String(targetRole).trim(), salaryInstruction);
 
     let userContent;
     if (fileType === "application/pdf") {
@@ -211,10 +272,10 @@ export async function POST(request) {
     }
 
     // ── Enhance with database data ────────────────────────────────────────────
-    const [{ data: roleSkills }, { data: salaryData }] = await Promise.all([
-      supabase.from("role_skills").select("*").eq("role_name", targetRole),
-      supabase.from("salary_benchmarks").select("*").eq("role_name", targetRole),
-    ]);
+    const { data: roleSkills } = await supabase
+      .from("role_skills")
+      .select("*")
+      .eq("role_name", targetRole);
 
     if (roleSkills?.length) {
       const skillMap = new Map(
@@ -247,7 +308,13 @@ export async function POST(request) {
       }
     }
 
-    result.salaryBenchmarks = salaryData ?? [];
+    if (hasSalaryData) {
+      result.salaryBenchmarks = salaryData;
+      result.salaryEstimate = null;
+    } else {
+      result.salaryBenchmarks = [];
+      // salaryEstimate is populated by AI in result when DB had no matching data
+    }
 
     // ── Log the scan ─────────────────────────────────────────────────────────
     await supabase.from("skillprint_scans").insert({

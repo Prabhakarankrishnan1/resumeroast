@@ -26,6 +26,22 @@ const LOADING_MESSAGES = [
   "Calculating your readiness score...",
 ];
 
+const COUNTRIES = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "Singapore",
+  "Canada",
+  "Australia",
+  "United Arab Emirates",
+  "Germany",
+  "Pakistan",
+  "Iran",
+  "Jordan",
+  "Philippines",
+  "Other (please specify below)",
+];
+
 const TARGET_ROLES = [
   "Software Developer",
   "Data Scientist",
@@ -94,6 +110,20 @@ interface SalaryBenchmark {
   max_salary?: number;
 }
 
+interface SalaryEstimateRange {
+  experience: string;
+  low: number;
+  high: number;
+}
+
+interface SalaryEstimate {
+  country: string;
+  city?: string;
+  currency: string;
+  experienceRanges: SalaryEstimateRange[];
+  note?: string;
+}
+
 interface SkillData {
   extractedSkills: ExtractedSkill[];
   categories: Category[];
@@ -103,6 +133,7 @@ interface SkillData {
   overallSummary: string;
   estimatedTimeToTarget?: string;
   salaryBenchmarks: SalaryBenchmark[];
+  salaryEstimate?: SalaryEstimate | null;
 }
 
 const CARD_STYLE: React.CSSProperties = {
@@ -178,6 +209,8 @@ function ProficiencyBar({ level }: { level: number }) {
 export default function SkillPrint() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [targetRole, setTargetRole] = useState("");
+  const [targetCountry, setTargetCountry] = useState("India");
+  const [targetCity, setTargetCity] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [skillData, setSkillData] = useState<SkillData | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -243,7 +276,7 @@ export default function SkillPrint() {
     setSelectedFile(file);
   };
 
-  const canGenerate = !!selectedFile && !!targetRole && !isAnalyzing;
+  const canGenerate = !!selectedFile && !!targetRole && !!targetCountry && !isAnalyzing;
 
   const handleAnalyze = async () => {
     if (!canGenerate) return;
@@ -252,6 +285,8 @@ export default function SkillPrint() {
       const formData = new FormData();
       formData.append("file", selectedFile!);
       formData.append("targetRole", targetRole);
+      formData.append("targetCountry", targetCountry);
+      if (targetCity.trim()) formData.append("targetCity", targetCity.trim());
       const res = await fetch("/api/skillprint", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
@@ -824,52 +859,109 @@ export default function SkillPrint() {
           );
         })()}
 
-        {/* Salary Benchmarks */}
-        {skillData.salaryBenchmarks?.length > 0 && (
-          <div style={CARD_STYLE}>
-            <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
-              Salary Benchmarks 💰
-            </p>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-                <thead>
-                  <tr>
-                    {["Experience", "City", "Range"].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          textAlign: "left",
-                          padding: "8px 12px",
-                          color: "#64748b",
-                          fontWeight: 600,
-                          borderBottom: "1px solid #1e293b",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {skillData.salaryBenchmarks.map((row, i) => {
-                    const min = row.min_salary != null ? (row.min_salary / 100000).toFixed(1) : null;
-                    const max = row.max_salary != null ? (row.max_salary / 100000).toFixed(1) : null;
-                    const range = min && max ? `₹${min} – ₹${max} LPA` : "—";
-                    const experience = row.experience ?? row.experience_level ?? "—";
-                    return (
-                      <tr key={i} style={{ borderBottom: i < skillData.salaryBenchmarks.length - 1 ? "1px solid #0f172a" : "none" }}>
-                        <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{experience}</td>
-                        <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{row.city ?? "—"}</td>
-                        <td style={{ padding: "10px 12px", color: "#0d9488", fontWeight: 600 }}>{range}</td>
+        {/* Salary Benchmarks / Estimate */}
+        {(() => {
+          const CURRENCY_SYMBOL: Record<string, string> = {
+            INR: "₹", USD: "$", GBP: "£", EUR: "€",
+            SGD: "S$", CAD: "C$", AUD: "A$", AED: "AED ",
+            PKR: "PKR ", IRR: "IRR ", JOD: "JD ", PHP: "₱",
+          };
+
+          const hasBenchmarks = (skillData.salaryBenchmarks?.length ?? 0) > 0;
+          const est = skillData.salaryEstimate;
+          const hasEstimate = !!est && (est.experienceRanges?.length ?? 0) > 0;
+
+          if (!hasBenchmarks && !hasEstimate) return null;
+
+          if (hasBenchmarks) {
+            return (
+              <div style={CARD_STYLE}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+                    Salary Benchmarks 💰
+                  </p>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: "#22c55e", backgroundColor: "rgba(34,197,94,0.12)", borderRadius: "999px", padding: "2px 8px" }}>
+                    ✓ Verified market data
+                  </span>
+                </div>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                    <thead>
+                      <tr>
+                        {["Experience", "City", "Range"].map((h) => (
+                          <th key={h} style={{ textAlign: "left", padding: "8px 12px", color: "#64748b", fontWeight: 600, borderBottom: "1px solid #1e293b", whiteSpace: "nowrap" }}>
+                            {h}
+                          </th>
+                        ))}
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {skillData.salaryBenchmarks.map((row, i) => {
+                        const min = row.min_salary != null ? (row.min_salary / 100000).toFixed(1) : null;
+                        const max = row.max_salary != null ? (row.max_salary / 100000).toFixed(1) : null;
+                        const range = min && max ? `₹${min} – ₹${max} LPA` : "—";
+                        const experience = row.experience ?? row.experience_level ?? "—";
+                        return (
+                          <tr key={i} style={{ borderBottom: i < skillData.salaryBenchmarks.length - 1 ? "1px solid #0f172a" : "none" }}>
+                            <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{experience}</td>
+                            <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{row.city ?? "—"}</td>
+                            <td style={{ padding: "10px 12px", color: "#0d9488", fontWeight: 600 }}>{range}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          }
+
+          // AI estimate path
+          const sym = CURRENCY_SYMBOL[est!.currency] ?? `${est!.currency} `;
+          const location = est!.city ? `${est!.city}, ${est!.country}` : est!.country;
+          const fmtNum = (n: number) => n.toLocaleString("en");
+
+          return (
+            <div style={CARD_STYLE}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+                  Salary Estimate for {location} 💰
+                </p>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.12)", borderRadius: "999px", padding: "2px 8px" }}>
+                  ⚠️ AI estimate — verify with local market data
+                </span>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr>
+                      {["Experience", "Range"].map((h) => (
+                        <th key={h} style={{ textAlign: "left", padding: "8px 12px", color: "#64748b", fontWeight: 600, borderBottom: "1px solid #1e293b", whiteSpace: "nowrap" }}>
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {est!.experienceRanges.map((row, i) => (
+                      <tr key={i} style={{ borderBottom: i < est!.experienceRanges.length - 1 ? "1px solid #0f172a" : "none" }}>
+                        <td style={{ padding: "10px 12px", color: "#cbd5e1" }}>{row.experience}</td>
+                        <td style={{ padding: "10px 12px", color: "#0d9488", fontWeight: 600 }}>
+                          {sym}{fmtNum(row.low)} – {sym}{fmtNum(row.high)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {est!.note && (
+                <p style={{ margin: "12px 0 0 0", fontSize: "11px", color: "#4b5563", lineHeight: 1.5 }}>
+                  {est!.note}
+                </p>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Skills table */}
         <div style={CARD_STYLE}>
@@ -976,6 +1068,8 @@ export default function SkillPrint() {
               setSkillData(null);
               setSelectedFile(null);
               setTargetRole("");
+              setTargetCountry("India");
+              setTargetCity("");
             }}
             style={{
               flex: 1,
@@ -1363,6 +1457,72 @@ export default function SkillPrint() {
               <option key={role} value={role}>{role}</option>
             ))}
           </select>
+        </div>
+
+        {/* Country + City row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+          <div>
+            <label
+              htmlFor="targetCountry"
+              style={{ display: "block", color: "#cbd5e1", fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}
+            >
+              Country
+            </label>
+            <select
+              id="targetCountry"
+              value={targetCountry}
+              onChange={(e) => setTargetCountry(e.target.value)}
+              style={{
+                width: "100%",
+                height: "44px",
+                backgroundColor: "#0f172a",
+                color: "#e5e7eb",
+                border: "1px solid #334155",
+                borderRadius: "8px",
+                padding: "0 12px",
+                fontSize: "14px",
+                cursor: "pointer",
+                outline: "none",
+                appearance: "none",
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 14px center",
+              }}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="targetCity"
+              style={{ display: "block", color: "#cbd5e1", fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}
+            >
+              City <span style={{ color: "#4b5563", fontWeight: 400 }}>(optional)</span>
+            </label>
+            <input
+              id="targetCity"
+              type="text"
+              value={targetCity}
+              onChange={(e) => setTargetCity(e.target.value)}
+              placeholder="e.g., Karachi, Tehran, Amman"
+              style={{
+                width: "100%",
+                height: "44px",
+                backgroundColor: "#0f172a",
+                color: "#e5e7eb",
+                border: "1px solid #334155",
+                borderRadius: "8px",
+                padding: "0 12px",
+                fontSize: "14px",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
         </div>
 
         <button
