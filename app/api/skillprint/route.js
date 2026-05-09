@@ -80,6 +80,7 @@ async function callClaude(userContent, targetRole) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4096,
+        temperature: 0.2,
         system:
           "You are SkillPrint, an expert career skill analyst. You extract skills from resumes, categorize them, rate proficiency, and compare against market demand for specific roles.",
         messages: [{ role: "user", content: userContent }],

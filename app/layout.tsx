@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title:
-    "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
+    "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
   description:
-    "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
+    "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
   keywords: [
     "resumeroast",
     "resume roast",
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title:
-      "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
+      "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
     description:
-      "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
+      "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
     url: "https://resumeroast.in",
     siteName: "ResumeRoast",
     type: "website",
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "ResumeRoast (Resume Roast) - Free AI Resume Reviewer | Instant Feedback",
+      "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
     description:
-      "Resume Roast - Upload your resume and get brutally honest AI feedback. Free AI resume roast with scores, section-by-section analysis, rewrite suggestions, and ATS scoring. Your resume is never stored and personal data is not saved. Try ResumeRoast today.",
+      "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
   },
 };
 
