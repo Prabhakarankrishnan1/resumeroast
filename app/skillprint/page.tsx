@@ -16,6 +16,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import Link from "next/link";
 import TopNav from "../components/TopNav";
 
 const LOADING_MESSAGES = [
@@ -1044,6 +1045,42 @@ export default function SkillPrint() {
               </button>
             </>
           )}
+        </div>
+
+        {/* Cross-promotion */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "700px",
+            backgroundColor: "#111827",
+            border: "1px solid #1e293b",
+            borderLeft: "3px solid #0d9488",
+            borderRadius: "12px",
+            padding: "20px",
+            boxSizing: "border-box",
+          }}
+        >
+          <p style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: "16px", color: "#ffffff" }}>
+            Need to update your resume with these skills? 📝
+          </p>
+          <p style={{ margin: "0 0 16px 0", fontSize: "14px", color: "#94a3b8", lineHeight: 1.6 }}>
+            Get a brutally honest review of your resume with section scores, ATS check, and AI rewrite suggestions.
+          </p>
+          <Link
+            href="/"
+            style={{
+              display: "inline-block",
+              backgroundColor: "#0d9488",
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 700,
+              padding: "10px 20px",
+              borderRadius: "8px",
+              textDecoration: "none",
+            }}
+          >
+            Get Your Resume Reviewed →
+          </Link>
         </div>
 
         {/* First-scan tracking nudge — only for this role */}
