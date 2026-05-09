@@ -9,6 +9,12 @@ import {
   Radar,
   Legend,
   ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
 } from "recharts";
 import TopNav from "../components/TopNav";
 
@@ -41,6 +47,13 @@ function isAllowedFile(file: File) {
   if (file.type === "application/pdf" || file.type === DOCX_MIME) return true;
   const name = file.name.toLowerCase();
   return name.endsWith(".pdf") || name.endsWith(".docx");
+}
+
+interface HistoryEntry {
+  date: string;
+  targetRole: string;
+  marketReadinessScore: number;
+  summary: string;
 }
 
 interface ExtractedSkill {
@@ -100,6 +113,10 @@ const CARD_STYLE: React.CSSProperties = {
   padding: "20px",
   boxSizing: "border-box",
 };
+
+function formatShortDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+}
 
 function scoreColor(score: number) {
   if (score < 40) return "#ef4444";
@@ -168,6 +185,16 @@ export default function SkillPrint() {
   const [feedbackGiven, setFeedbackGiven] = useState<"yes" | "no" | null>(null);
   const [showShareCard, setShowShareCard] = useState(false);
   const [roadmapCopySuccess, setRoadmapCopySuccess] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("skillprint-history") ?? "[]");
+      if (Array.isArray(stored)) setHistory(stored);
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
 
   useEffect(() => {
     if (!isAnalyzing) {
@@ -230,6 +257,23 @@ export default function SkillPrint() {
         alert(data.error || "Something went wrong. Please try again.");
       } else {
         setSkillData(data);
+        try {
+          const entry = {
+            date: new Date().toISOString(),
+            targetRole,
+            marketReadinessScore: data.marketReadinessScore,
+            summary: data.overallSummary ?? "",
+          };
+          const existing: typeof entry[] = JSON.parse(
+            localStorage.getItem("skillprint-history") ?? "[]"
+          );
+          const updated = [entry, ...existing].slice(0, 12);
+          localStorage.setItem("skillprint-history", JSON.stringify(updated));
+          localStorage.setItem("skillprint-latest", JSON.stringify(entry));
+          setHistory(updated);
+        } catch {
+          // localStorage unavailable — silently skip
+        }
       }
     } catch {
       alert("Failed to connect. Please check your connection and try again.");
@@ -383,6 +427,55 @@ export default function SkillPrint() {
             {targetRole} · {skillData.extractedSkills.length} skills detected
           </p>
         </div>
+
+        {/* Progress chart — only if 2+ history entries */}
+        {history.length > 1 && (() => {
+          const chartData = [...history].reverse().map((h) => ({
+            date: formatShortDate(h.date),
+            score: h.marketReadinessScore,
+          }));
+          const oldest = history[history.length - 1];
+          const latest = history[0];
+          const delta = latest.marketReadinessScore - oldest.marketReadinessScore;
+          const deltaStr = `${delta >= 0 ? "+" : ""}${delta}%`;
+
+          return (
+            <div style={CARD_STYLE}>
+              <p style={{ margin: "0 0 16px 0", fontWeight: 700, fontSize: "15px", color: "#e2e8f0" }}>
+                Your Progress 📈
+              </p>
+              <div style={{ height: "200px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+                    <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#111827", border: "1px solid #1e293b", borderRadius: "8px", fontSize: "12px" }}
+                      labelStyle={{ color: "#94a3b8" }}
+                      itemStyle={{ color: "#0d9488" }}
+                      formatter={(v: number) => [`${v}%`, "Score"]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#0d9488"
+                      strokeWidth={2}
+                      dot={{ fill: "#f59e0b", r: 4, strokeWidth: 0 }}
+                      activeDot={{ r: 6, fill: "#f59e0b" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <p style={{ margin: "14px 0 4px 0", fontSize: "13px", color: "#0d9488", lineHeight: 1.5 }}>
+                You were <strong>{oldest.marketReadinessScore}%</strong> ready in {formatShortDate(oldest.date)}. Now you&apos;re <strong>{latest.marketReadinessScore}%</strong>. That&apos;s <strong>{deltaStr}</strong> growth!
+              </p>
+              <p style={{ margin: 0, fontSize: "12px", color: "#4b5563" }}>
+                💡 Scan your resume monthly to track progress
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Market Readiness Score */}
         <div style={CARD_STYLE}>
@@ -949,6 +1042,13 @@ export default function SkillPrint() {
             </>
           )}
         </div>
+
+        {/* First-scan tracking nudge */}
+        {history.length === 1 && (
+          <p style={{ margin: 0, fontSize: "12px", color: "#4b5563", textAlign: "center" }}>
+            📈 Scan again next month to start tracking your progress
+          </p>
+        )}
 
         {/* Share Card Modal */}
         {showShareCard && (
