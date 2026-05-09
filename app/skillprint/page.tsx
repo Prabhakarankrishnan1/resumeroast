@@ -163,6 +163,7 @@ export default function SkillPrint() {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [copySuccess, setCopySuccess] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState<"yes" | "no" | null>(null);
+  const [showShareCard, setShowShareCard] = useState(false);
 
   useEffect(() => {
     if (!isAnalyzing) {
@@ -691,7 +692,7 @@ export default function SkillPrint() {
           }}
         >
           <button
-            onClick={handleShare}
+            onClick={() => setShowShareCard(true)}
             style={{
               flex: 1,
               minWidth: "200px",
@@ -700,13 +701,13 @@ export default function SkillPrint() {
               fontWeight: 700,
               borderRadius: "8px",
               border: "1px solid #0d9488",
-              backgroundColor: copySuccess ? "#0d9488" : "transparent",
-              color: copySuccess ? "#ffffff" : "#0d9488",
+              backgroundColor: "transparent",
+              color: "#0d9488",
               cursor: "pointer",
               transition: "background-color 180ms ease, color 180ms ease",
             }}
           >
-            {copySuccess ? "Copied! ✓" : "Share My SkillPrint 📤"}
+            Share My SkillPrint 📤
           </button>
 
           <button
@@ -784,6 +785,126 @@ export default function SkillPrint() {
             </>
           )}
         </div>
+
+        {/* Share Card Modal */}
+        {showShareCard && (
+          <div
+            onClick={() => setShowShareCard(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "rgba(0,0,0,0.8)",
+              zIndex: 1000,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px",
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "min(400px, 90vw)",
+                background: "linear-gradient(160deg, #0a1628 0%, #0a0a0a 100%)",
+                border: "1px solid #0d9488",
+                borderRadius: "16px",
+                padding: "32px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+              }}
+            >
+              {/* Brand */}
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#0d9488", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                🎯 SkillPrint
+              </p>
+
+              {/* Score */}
+              <div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                  <span style={{ fontSize: "60px", fontWeight: 800, color: "#ffffff", lineHeight: 1 }}>
+                    {skillData.marketReadinessScore}
+                  </span>
+                  <span style={{ fontSize: "22px", fontWeight: 700, color: "#64748b" }}>% READY</span>
+                </div>
+                <p style={{ margin: "6px 0 0 0", fontSize: "18px", color: "#94a3b8" }}>
+                  for {targetRole} roles
+                </p>
+              </div>
+
+              {/* Strengths */}
+              <div>
+                <p style={{ margin: "0 0 8px 0", fontSize: "13px", fontWeight: 700, color: "#e2e8f0" }}>
+                  Top Strengths 💪
+                </p>
+                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "5px" }}>
+                  {skillData.topStrengths.slice(0, 3).map((s, i) => (
+                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: "7px" }}>
+                      <span style={{ color: "#22c55e", flexShrink: 0, marginTop: "1px" }}>✓</span>
+                      <span style={{ fontSize: "13px", color: "#cbd5e1", lineHeight: 1.4 }}>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Biggest gap */}
+              {skillData.criticalGaps[0] && (
+                <div>
+                  <p style={{ margin: "0 0 4px 0", fontSize: "13px", fontWeight: 700, color: "#e2e8f0" }}>
+                    Biggest Gap 🎯
+                  </p>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
+                    {skillData.criticalGaps[0].skill}
+                  </p>
+                </div>
+              )}
+
+              {/* CTA */}
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                Get yours at{" "}
+                <span style={{ color: "#0d9488", fontWeight: 700 }}>resumeroast.in/skillprint</span>
+              </p>
+            </div>
+
+            {/* Modal action buttons */}
+            <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+              <button
+                onClick={handleShare}
+                style={{
+                  height: "40px",
+                  padding: "0 20px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  borderRadius: "8px",
+                  border: "1px solid #0d9488",
+                  backgroundColor: copySuccess ? "#0d9488" : "transparent",
+                  color: copySuccess ? "#ffffff" : "#0d9488",
+                  cursor: "pointer",
+                  transition: "background-color 180ms ease, color 180ms ease",
+                }}
+              >
+                {copySuccess ? "Copied! ✓" : "📋 Copy as Text"}
+              </button>
+              <button
+                onClick={() => setShowShareCard(false)}
+                style={{
+                  height: "40px",
+                  padding: "0 20px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  borderRadius: "8px",
+                  border: "1px solid #334155",
+                  backgroundColor: "transparent",
+                  color: "#94a3b8",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
