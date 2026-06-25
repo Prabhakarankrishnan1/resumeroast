@@ -106,7 +106,7 @@ Rules:
 
 async function callClaude(userContent, targetRole) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60_000);
+  const timeoutId = setTimeout(() => controller.abort(), 55_000); // 55s — stay under 60s Vercel limit
 
   try {
     return await fetch("https://api.anthropic.com/v1/messages", {

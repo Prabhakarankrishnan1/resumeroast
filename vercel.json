@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "app/api/review/route.js": {
+      "maxDuration": 60
+    },
+    "app/api/skillprint/route.js": {
+      "maxDuration": 60
+    },
+    "app/api/fix/route.js": {
+      "maxDuration": 60
+    }
+  }
+}
