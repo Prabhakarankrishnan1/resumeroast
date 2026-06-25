@@ -201,7 +201,7 @@ export async function POST(request) {
 
       if (!response.ok) {
         console.error("Claude API error:", errorText);
-        return NextResponse.json({ error: "AI service error" }, { status: 500 });
+        return NextResponse.json({ error: "AI service error", details: errorText }, { status: 500 });
       }
     }
 
@@ -222,6 +222,7 @@ export async function POST(request) {
 
     return NextResponse.json(result);
   } catch (error) {
+    console.error("FULL ERROR:", error);
     console.error("Server error:", error);
     if (error?.name === "AbortError") {
       return NextResponse.json(
@@ -229,6 +230,10 @@ export async function POST(request) {
         { status: 504 }
       );
     }
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json({
+      error: "Something went wrong",
+      details: error.message,
+      stack: error.stack?.split("\n").slice(0, 3).join(" | "),
+    }, { status: 500 });
   }
 }
