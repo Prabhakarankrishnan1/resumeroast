@@ -257,12 +257,22 @@ export async function POST(request) {
       jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
     }
 
+    console.log("SKILLPRINT RAW TEXT:", aiText?.substring(0, 1500));
+    console.log("SKILLPRINT TEXT LENGTH:", aiText?.length);
+    console.log("SKILLPRINT CLEANED JSON:", jsonString?.substring(0, 1500));
+
     let result;
     try {
       result = JSON.parse(jsonString);
     } catch (parseErr) {
       console.error("Failed to parse AI response:", parseErr.message, "\nRaw:", aiText);
-      return NextResponse.json({ error: "Could not parse AI response" }, { status: 500 });
+      return NextResponse.json({
+        error: "Could not parse AI response",
+        parseError: parseErr.message,
+        rawPreview: aiText ? aiText.substring(0, 800) : "no raw text",
+        cleanedPreview: jsonString ? jsonString.substring(0, 800) : "no cleaned text",
+        textLength: aiText?.length || 0,
+      }, { status: 500 });
     }
 
     // ── Enhance with database data ────────────────────────────────────────────
