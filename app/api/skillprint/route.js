@@ -244,31 +244,25 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    const aiText = data.content?.[0]?.text ?? "";
+    let aiText = data.content?.[0]?.text ?? "";
+
+    let jsonString = aiText
+      .replace(/```json\s*/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const jsonStart = jsonString.indexOf("{");
+    const jsonEnd = jsonString.lastIndexOf("}");
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+    }
 
     let result;
     try {
-      result = JSON.parse(aiText);
-    } catch {
-      const start = aiText.indexOf("{");
-      const end = aiText.lastIndexOf("}");
-      if (start !== -1 && end !== -1 && end > start) {
-        try {
-          result = JSON.parse(aiText.slice(start, end + 1));
-        } catch {
-          console.error("Failed to extract JSON from AI response:", aiText);
-          return NextResponse.json(
-            { error: "Could not parse AI response" },
-            { status: 500 }
-          );
-        }
-      } else {
-        console.error("No JSON found in AI response:", aiText);
-        return NextResponse.json(
-          { error: "Could not parse AI response" },
-          { status: 500 }
-        );
-      }
+      result = JSON.parse(jsonString);
+    } catch (parseErr) {
+      console.error("Failed to parse AI response:", parseErr.message, "\nRaw:", aiText);
+      return NextResponse.json({ error: "Could not parse AI response" }, { status: 500 });
     }
 
     // ── Enhance with database data ────────────────────────────────────────────
