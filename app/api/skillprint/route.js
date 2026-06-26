@@ -57,6 +57,15 @@ ADDITIONALLY, include a "salaryEstimate" field in your JSON with estimated annua
 function buildSkillprintPrompt(targetRole, salaryInstruction = "") {
   return `Analyze this resume against the target role: ${targetRole}
 
+IMPORTANT: Keep your response concise to fit token limits:
+- Extract maximum 15 most important skills (not exhaustive list)
+- evidenceFromResume should be 1 short sentence, max 80 characters
+- overallSummary should be 2 sentences max
+- topStrengths should be 3 items max
+- criticalGaps should be 5 items max
+- Each recommendation should be 1 sentence, max 100 characters
+- No verbose explanations, just the data
+
 Return ONLY valid JSON, no other text, in exactly this format:
 {
   "extractedSkills": [
@@ -118,7 +127,7 @@ async function callClaude(userContent, targetRole) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4096,
+        max_tokens: 16000,
         thinking: { type: "disabled" },
         system:
           "You are SkillPrint, an expert career skill analyst. You extract skills from resumes, categorize them, rate proficiency, and compare against market demand for specific roles.",
