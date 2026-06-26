@@ -202,7 +202,7 @@ export async function POST(request) {
 
       if (!response.ok) {
         console.error("Claude API error:", errorText);
-        return NextResponse.json({ error: "AI service error", details: errorText }, { status: 500 });
+        return NextResponse.json({ error: "Our AI is experiencing issues right now. Please try again in a minute." }, { status: 500 });
       }
     }
 
