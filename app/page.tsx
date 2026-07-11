@@ -757,6 +757,15 @@ export default function Home() {
             <a href="#" style={{ color: "#cbd5e1", textDecoration: "none" }}>
               Privacy
             </a>
+            <span style={{ margin: "0 12px", color: "#64748b" }}>·</span>
+            <a
+              href="https://booksmith530.gumroad.com/l/job-search-ai-kit/ROAST50"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#cbd5e1", textDecoration: "none" }}
+            >
+              Job Search AI Kit
+            </a>
           </div>
 
           <p style={{ margin: 0, color: "#94a3b8" }}>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import KitOffer, { KitOfferTeaser } from "./KitOffer";
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 
@@ -275,7 +276,7 @@ export default function ReviewResults({
   const personaLabel = personaById[personaId] || personaById.kind;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white px-4 py-6">
+    <div className="min-h-screen bg-[#050505] text-white px-4 pt-6 pb-12">
       <div
         className={[
           "max-w-[700px] mx-auto space-y-8 transition-all duration-700 ease-out",
@@ -649,6 +650,8 @@ export default function ReviewResults({
           </div>
         )}
 
+        <KitOfferTeaser />
+
         {/* Top 3 improvements + Elevator pitch */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div
@@ -919,6 +922,9 @@ export default function ReviewResults({
           >
             Review Another Resume
           </button>
+          <div className="w-full max-w-[500px]">
+            <KitOffer />
+          </div>
         </div>
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import Link from "next/link";
 import TopNav from "../components/TopNav";
+import KitOffer, { KitOfferTeaser } from "../components/KitOffer";
 
 const LOADING_MESSAGES = [
   "Extracting your skills...",
@@ -859,6 +860,8 @@ export default function SkillPrint() {
           );
         })()}
 
+        <KitOfferTeaser />
+
         {/* Salary Benchmarks / Estimate */}
         {(() => {
           const CURRENCY_SYMBOL: Record<string, string> = {
@@ -1175,6 +1178,11 @@ export default function SkillPrint() {
           >
             Get Your Resume Reviewed →
           </Link>
+        </div>
+
+        {/* Kit upsell */}
+        <div style={{ width: "100%", maxWidth: "700px", boxSizing: "border-box" }}>
+          <KitOffer />
         </div>
 
         {/* First-scan tracking nudge — only for this role */}
