@@ -121,6 +121,13 @@ export default function Home() {
     setIsFixing(false);
     setFixedResume(null);
     try {
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "roast_started", { event_category: "engagement" });
+      }
+    } catch (err) {
+      console.error("Analytics event failed:", err);
+    }
+    try {
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("persona", selectedPersona);
@@ -131,6 +138,13 @@ export default function Home() {
       } else {
         setResults(data);
         console.log("Results:", data);
+        try {
+          if (typeof window !== "undefined" && (window as any).gtag) {
+            (window as any).gtag("event", "roast_completed", { event_category: "engagement" });
+          }
+        } catch (err) {
+          console.error("Analytics event failed:", err);
+        }
       }
     } catch (err) {
       setApiError("Failed to connect. Please check your connection and try again.");

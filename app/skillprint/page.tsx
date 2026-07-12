@@ -283,6 +283,13 @@ export default function SkillPrint() {
     if (!canGenerate) return;
     setIsAnalyzing(true);
     try {
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "skillprint_scan_started", { event_category: "engagement" });
+      }
+    } catch (err) {
+      console.error("Analytics event failed:", err);
+    }
+    try {
       const formData = new FormData();
       formData.append("file", selectedFile!);
       formData.append("targetRole", targetRole);
