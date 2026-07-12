@@ -134,8 +134,7 @@ function KitOfferTeaserInner() {
       <a
         href="#kit-offer"
         onClick={handleClick}
-        style={{ color: "#94a3b8", textDecoration: "underline", textDecorationColor: "#475569" }}
-        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500"
+        className="no-underline hover:underline text-slate-400 hover:text-teal-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-500"
       >
         Want a shortcut to fix these? See the Job Search AI Kit ↓
       </a>
