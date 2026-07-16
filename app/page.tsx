@@ -513,7 +513,7 @@ export default function Home() {
                   lineHeight: 1.1,
                 }}
               >
-                500+
+                1000+
               </p>
               <p
                 style={{
