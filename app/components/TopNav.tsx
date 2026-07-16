@@ -41,18 +41,19 @@ export default function TopNav({ activePage }: { activePage: ActivePage }) {
             🔥 ResumeRoast
           </Link>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Link
               href="/"
-              className="top-nav-link"
+              className={activePage === "resume-review" ? "top-nav-active" : "top-nav-inactive"}
               style={{
-                color: activePage === "resume-review" ? "#ffffff" : "#94a3b8",
                 textDecoration: "none",
-                paddingBottom: "4px",
-                borderBottom:
-                  activePage === "resume-review" ? "2px solid #ff6b35" : "none",
-                fontWeight: activePage === "resume-review" ? 600 : 500,
-                fontSize: "14px",
+                fontWeight: 600,
+                fontSize: "16px",
+                padding: "8px 16px",
+                borderRadius: "9999px",
+                ...(activePage === "resume-review"
+                  ? { backgroundColor: "#0d9488", color: "#ffffff" }
+                  : { color: "#94a3b8" }),
               }}
             >
               Resume Review
@@ -60,15 +61,16 @@ export default function TopNav({ activePage }: { activePage: ActivePage }) {
 
             <Link
               href="/skillprint"
-              className="top-nav-link"
+              className={activePage === "skillprint" ? "top-nav-active" : "top-nav-inactive"}
               style={{
-                color: activePage === "skillprint" ? "#ffffff" : "#94a3b8",
                 textDecoration: "none",
-                paddingBottom: "4px",
-                borderBottom:
-                  activePage === "skillprint" ? "2px solid #0d9488" : "none",
-                fontWeight: activePage === "skillprint" ? 600 : 500,
-                fontSize: "14px",
+                fontWeight: 600,
+                fontSize: "16px",
+                padding: "8px 16px",
+                borderRadius: "9999px",
+                ...(activePage === "skillprint"
+                  ? { backgroundColor: "#0d9488", color: "#ffffff" }
+                  : { color: "#94a3b8" }),
               }}
             >
               SkillPrint
@@ -78,9 +80,14 @@ export default function TopNav({ activePage }: { activePage: ActivePage }) {
       </div>
 
       <style jsx>{`
+        .top-nav-inactive:hover {
+          color: #e2e8f0 !important;
+        }
         @media (max-width: 640px) {
-          .top-nav-link {
-            font-size: 13px !important;
+          .top-nav-active,
+          .top-nav-inactive {
+            font-size: 14px !important;
+            padding: 6px 12px !important;
           }
         }
       `}</style>
