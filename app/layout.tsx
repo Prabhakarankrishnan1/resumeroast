@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     title: "Free AI Resume Review | ATS Checker | ResumeRoast",
     description:
       "Get an honest AI resume review in 30 seconds. Free ATS checker, section scores, and AI-improved resume download. No login required.",
-    url: "https://resumeroast.in",
+    url: "https://www.resumeroast.in",
     siteName: "ResumeRoast",
     type: "website",
   },

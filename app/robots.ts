@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://resumeroast.in/sitemap.xml",
+    sitemap: "https://www.resumeroast.in/sitemap.xml",
   };
 }

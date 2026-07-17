@@ -84,7 +84,7 @@ export default function ReviewResults({
   };
 
   const handleShareScore = async () => {
-    const shareText = `I scored ${overallScore}/10 on ResumeRoast! 🔥 Get your free resume roast at https://resumeroast.in`;
+    const shareText = `I scored ${overallScore}/10 on ResumeRoast! 🔥 Get your free resume roast at https://www.resumeroast.in`;
     await copyToClipboard(shareText);
     setShowCopied(true);
     setTimeout(() => {
