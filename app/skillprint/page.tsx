@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import TopNav from "../components/TopNav";
 import KitOffer, { KitOfferTeaser } from "../components/KitOffer";
+import SkillPrintContent from "../components/SkillPrintContent";
 
 const LOADING_MESSAGES = [
   "Extracting your skills...",
@@ -1584,6 +1585,8 @@ export default function SkillPrint() {
             0 0 18px rgba(13, 148, 136, 0.15);
         }
       `}</style>
+
+      <SkillPrintContent />
     </div>
   );
 }

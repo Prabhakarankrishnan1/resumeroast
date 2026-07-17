@@ -16,34 +16,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title:
-    "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
+  title: "Free AI Resume Review | ATS Checker | ResumeRoast",
   description:
-    "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
+    "Get an honest AI resume review in 30 seconds. Free ATS checker, section scores, and AI-improved resume download. No login required.",
   keywords: [
-    "resumeroast",
-    "resume roast",
-    "AI resume review",
+    "free resume review",
+    "AI resume checker",
+    "ATS resume checker",
     "resume feedback",
+    "rate my resume free",
     "resume score",
-    "free resume checker",
-    "resume roast AI",
+    "AI resume review",
+    "resumeroast",
   ],
   openGraph: {
-    title:
-      "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
+    title: "Free AI Resume Review | ATS Checker | ResumeRoast",
     description:
-      "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
+      "Get an honest AI resume review in 30 seconds. Free ATS checker, section scores, and AI-improved resume download. No login required.",
     url: "https://resumeroast.in",
     siteName: "ResumeRoast",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "ResumeRoast — AI Resume Review + Skill Intelligence | Free",
+    title: "Free AI Resume Review | ATS Checker | ResumeRoast",
     description:
-      "Free AI-powered resume reviewer with section scores, ATS check, and rewrite suggestions. Plus SkillPrint: map your skills against market demand and get a personalized learning roadmap.",
+      "Get an honest AI resume review in 30 seconds. Free ATS checker, section scores, and AI-improved resume download. No login required.",
   },
 };
 

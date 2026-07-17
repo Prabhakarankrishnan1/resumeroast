@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "SkillPrint — Map Your Skills Against Market Demand | ResumeRoast",
+  title: "SkillPrint | Skill Gap Analysis and Market Readiness Score",
   description:
-    "Free AI skill analysis tool. Upload your resume, pick your target role, see a visual radar chart of your skills vs market demand. Find your gaps and get a personalized learning roadmap.",
+    "Analyze your skills against real market demand. Get your Market Readiness Score, learning roadmap, and salary benchmarks. Free and no login.",
 };
 
 export default function SkillPrintLayout({

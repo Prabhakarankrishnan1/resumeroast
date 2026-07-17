@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ReviewResults from "./components/ReviewResults";
 import TopNav from "./components/TopNav";
+import LandingContent from "./components/LandingContent";
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -727,6 +728,8 @@ export default function Home() {
           />
         </div>
       )}
+
+      {!results && <LandingContent />}
 
       <footer
         style={{
